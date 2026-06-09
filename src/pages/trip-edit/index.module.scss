@@ -1,0 +1,226 @@
+@import '@/styles/theme.scss';
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, $color-bg-page 0%, #ffffff 100%);
+  padding-bottom: 140rpx;
+}
+
+.header {
+  padding: 32rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: #fff;
+}
+
+.headerTitle {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.headerSubtitle {
+  font-size: 26rpx;
+  opacity: 0.9;
+}
+
+.form {
+  padding: 32rpx;
+}
+
+.formCard {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 24rpx;
+}
+
+.attractionInfo {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid $color-border;
+}
+
+.attractionImage {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 16rpx;
+}
+
+.attractionText {
+  flex: 1;
+}
+
+.attractionName {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin-bottom: 8rpx;
+}
+
+.attractionMeta {
+  font-size: 24rpx;
+  color: $color-text-secondary;
+}
+
+.formItem {
+  margin-bottom: 32rpx;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.formLabel {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.timePickerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.timeOption {
+  background: $color-bg-secondary;
+  border: none;
+  border-radius: 16rpx;
+  padding: 20rpx 0;
+  font-size: 26rpx;
+  color: $color-text-secondary;
+  transition: all 0.2s;
+
+  &.active {
+    background: $color-primary;
+    color: #fff;
+  }
+}
+
+.transportOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.transportOption {
+  background: $color-bg-secondary;
+  border: none;
+  border-radius: 40rpx;
+  padding: 16rpx 32rpx;
+  font-size: 26rpx;
+  color: $color-text-secondary;
+  transition: all 0.2s;
+
+  &.active {
+    background: $color-secondary;
+    color: #fff;
+  }
+}
+
+.formTextarea {
+  width: 100%;
+  min-height: 160rpx;
+  background: $color-bg-secondary;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.ticketSection {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 24rpx;
+}
+
+.sectionTitle {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin-bottom: 24rpx;
+}
+
+.ticketInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-radius: 16rpx;
+}
+
+.ticketLabel {
+  font-size: 28rpx;
+  color: $color-text-primary;
+}
+
+.ticketPrice {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: $color-price;
+}
+
+.priceInput {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.pricePrefix {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: $color-price;
+}
+
+.priceField {
+  flex: 1;
+  height: 80rpx;
+  background: $color-bg-secondary;
+  border-radius: 16rpx;
+  padding: 0 20rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: 20rpx;
+}
+
+.bottomBtn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 48rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  border: none;
+
+  &.delete {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  &.save {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: #fff;
+  }
+}

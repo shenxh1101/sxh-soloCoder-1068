@@ -1,0 +1,401 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-md $page-padding;
+  padding-bottom: 120rpx;
+}
+
+.weatherCard {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-xl;
+  color: $color-text-white;
+  box-shadow: $shadow-card;
+}
+
+.weatherHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-lg;
+}
+
+.weatherMain {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+}
+
+.weatherIcon {
+  font-size: 100rpx;
+}
+
+.weatherTemp {
+  font-size: 72rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+}
+
+.weatherCondition {
+  font-size: $font-size-lg;
+  opacity: 0.9;
+  margin-top: $spacing-xs;
+}
+
+.weatherLocation {
+  font-size: $font-size-sm;
+  opacity: 0.8;
+}
+
+.weatherTips {
+  padding-top: $spacing-lg;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+  font-size: $font-size-sm;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.progressCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  box-shadow: $shadow-card;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.progressTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.progressText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.progressBar {
+  height: 16rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-round;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-round;
+  transition: width $transition-slow ease;
+}
+
+.section {
+  margin-bottom: $spacing-xl;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.addBtn {
+  @include button-reset;
+  height: 56rpx;
+  padding: 0 $spacing-lg;
+  background: $color-primary;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.categoryTabs {
+  @include scroll-x-container;
+  margin: 0 -$page-padding $spacing-md;
+  padding: 0 $page-padding;
+}
+
+.categoryTab {
+  @include scroll-x-item(auto);
+  @include button-reset;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-card;
+  color: $color-text-secondary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  margin-right: $spacing-sm;
+  box-shadow: $shadow-card;
+  white-space: nowrap;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.checklistCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: 0 $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.travelersCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.travelerItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.travelerAvatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.travelerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.travelerName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.travelerRole {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background: $color-tag-bg;
+  padding: 2rpx 12rpx;
+  border-radius: $radius-sm;
+  display: inline-block;
+  margin-top: 4rpx;
+}
+
+.travelerTasks {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+  @include text-ellipsis;
+}
+
+.addTravelerBtn {
+  @include button-reset;
+  width: 100%;
+  height: 72rpx;
+  background: $color-bg-hover;
+  color: $color-primary;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  margin-top: $spacing-md;
+
+  &:active {
+    background: $color-border;
+    transform: scale(0.98);
+  }
+}
+
+.emptyState {
+  padding: $spacing-xl;
+  text-align: center;
+  color: $color-text-tertiary;
+}
+
+.emptyText {
+  font-size: $font-size-sm;
+}
+
+.departureCard {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-xl;
+}
+
+.departureTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: #78350f;
+  margin-bottom: $spacing-md;
+}
+
+.departureItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm 0;
+  font-size: $font-size-sm;
+  color: #92400e;
+
+  .icon {
+    margin-right: $spacing-sm;
+  }
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 120rpx;
+  left: $page-padding;
+  right: $page-padding;
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-float;
+}
+
+.bottomBtn {
+  @include button-reset;
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &.secondary {
+    background: $color-bg-hover;
+    color: $color-text-secondary;
+  }
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: $page-padding;
+}
+
+.modalContent {
+  width: 100%;
+  max-width: 686rpx;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modalTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+}
+
+.formItem {
+  margin-bottom: $spacing-lg;
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.formInput {
+  width: 100%;
+  height: 80rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: 0 $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.modalActions {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-xl;
+}
+
+.modalBtn {
+  @include button-reset;
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.confirm {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &.cancel {
+    background: $color-bg-hover;
+    color: $color-text-secondary;
+  }
+}

@@ -1,0 +1,260 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-md $page-padding;
+  padding-bottom: 160rpx;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-lg;
+}
+
+.tripInfo {
+  flex: 1;
+}
+
+.tripName {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.tripDates {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+}
+
+.editBtn {
+  @include button-reset;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-card;
+  color: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  box-shadow: $shadow-card;
+
+  &:active {
+    background: $color-bg-hover;
+    transform: scale(0.96);
+  }
+}
+
+.stats {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+}
+
+.statCard {
+  flex: 1;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  text-align: center;
+  box-shadow: $shadow-card;
+}
+
+.statNumber {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+}
+
+.section {
+  margin-bottom: $spacing-xl;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionSub {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.emptyState {
+  padding: $spacing-xl * 2;
+  text-align: center;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx dashed $color-border;
+}
+
+.emptyIcon {
+  font-size: 100rpx;
+  margin-bottom: $spacing-md;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-md;
+}
+
+.actionBtn {
+  @include button-reset;
+  display: inline-flex;
+  height: 72rpx;
+  padding: 0 $spacing-xl;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.attractionItem {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.attractionImage {
+  width: 160rpx;
+  height: 120rpx;
+  border-radius: $radius-md;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-right: $spacing-md;
+
+  Image {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.attractionContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.attractionName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.attractionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-top: $spacing-xs;
+}
+
+.tag {
+  padding: 2rpx 12rpx;
+  background: $color-tag-bg;
+  color: $color-tag-text;
+  font-size: $font-size-xs;
+  border-radius: $radius-sm;
+  white-space: nowrap;
+}
+
+.attractionFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-sm;
+}
+
+.price {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-price;
+}
+
+.addBtn {
+  @include button-reset;
+  height: 56rpx;
+  padding: 0 $spacing-lg;
+  background: $color-success;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.scheduled {
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 120rpx;
+  left: $page-padding;
+  right: $page-padding;
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-float;
+}
+
+.bottomBtn {
+  @include button-reset;
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &.secondary {
+    background: $color-bg-hover;
+    color: $color-text-secondary;
+  }
+}

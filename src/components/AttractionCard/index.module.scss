@@ -1,0 +1,107 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.image {
+  width: 220rpx;
+  height: 180rpx;
+  flex-shrink: 0;
+  background: $color-bg-hover;
+
+  Image {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.content {
+  flex: 1;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-sm;
+}
+
+.name {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+}
+
+.favoriteBtn {
+  @include button-reset;
+  width: 56rpx;
+  height: 56rpx;
+  background: transparent;
+  border-radius: $radius-round;
+  font-size: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.tag {
+  padding: 2rpx 12rpx;
+  background: $color-tag-bg;
+  color: $color-tag-text;
+  font-size: $font-size-xs;
+  border-radius: $radius-sm;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-sm;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  font-size: $font-size-sm;
+  color: $color-warning;
+  font-weight: $font-weight-medium;
+}
+
+.price {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-price;
+}
+
+.free {
+  color: $color-success;
+}

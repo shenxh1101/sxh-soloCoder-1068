@@ -1,0 +1,175 @@
+@use '@/styles/variables.scss' as *;
+
+.timeline {
+  position: relative;
+  padding-left: 48rpx;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 16rpx;
+  top: 0;
+  bottom: 0;
+  width: 4rpx;
+  background: $color-border;
+}
+
+.slot {
+  position: relative;
+  margin-bottom: $spacing-lg;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.slotDot {
+  position: absolute;
+  left: -40rpx;
+  top: 8rpx;
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: $radius-round;
+  border: 4rpx solid $color-bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.morning {
+  background: $color-warning;
+}
+
+.afternoon {
+  background: $color-primary;
+}
+
+.evening {
+  background: #8b5cf6;
+}
+
+.slotCard {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.slotHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.time {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.periodTag {
+  padding: 2rpx 12rpx;
+  font-size: $font-size-xs;
+  border-radius: $radius-sm;
+  color: $color-text-white;
+
+  &.morning {
+    background: $color-warning;
+  }
+
+  &.afternoon {
+    background: $color-primary;
+  }
+
+  &.evening {
+    background: #8b5cf6;
+  }
+}
+
+.attractionName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.slotMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.slotActions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.actionBtn {
+  @include button-reset;
+  flex: 1;
+  height: 56rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &:active {
+    background: $color-border;
+    transform: scale(0.98);
+  }
+
+  &.danger {
+    color: $color-error;
+  }
+}
+
+.hotelCard {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.hotelLabel {
+  font-size: $font-size-xs;
+  color: #92400e;
+  margin-bottom: $spacing-xs;
+}
+
+.hotelName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: #78350f;
+  margin-bottom: $spacing-xs;
+}
+
+.hotelInfo {
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-xs;
+  color: #92400e;
+}
+
+.emptyState {
+  padding: $spacing-xl;
+  text-align: center;
+  color: $color-text-tertiary;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  border: 2rpx dashed $color-border;
+}
+
+.emptyText {
+  font-size: $font-size-sm;
+}

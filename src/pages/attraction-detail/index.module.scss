@@ -1,0 +1,214 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.banner {
+  position: relative;
+  width: 100%;
+  height: 400rpx;
+
+  Image {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.favoriteBtn {
+  @include button-reset;
+  position: absolute;
+  top: $spacing-lg;
+  right: $spacing-lg;
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: $radius-round;
+  font-size: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: $shadow-card;
+  z-index: 10;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.content {
+  padding: 0 $page-padding;
+  margin-top: -$spacing-lg;
+  position: relative;
+  z-index: 20;
+}
+
+.infoCard {
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.header {
+  margin-bottom: $spacing-md;
+}
+
+.name {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: 1.3;
+  margin-bottom: $spacing-sm;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  font-size: $font-size-md;
+  color: $color-warning;
+  font-weight: $font-weight-semibold;
+}
+
+.location {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.tag {
+  padding: $spacing-xs $spacing-md;
+  background: $color-tag-bg;
+  color: $color-tag-text;
+  font-size: $font-size-xs;
+  border-radius: $radius-sm;
+  white-space: nowrap;
+}
+
+.section {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.description {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: 1.8;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.infoLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.infoValue {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.price {
+  color: $color-price;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+}
+
+.free {
+  color: $color-success;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+  padding-bottom: calc(env(safe-area-inset-bottom) + #{$spacing-md});
+}
+
+.btn {
+  @include button-reset;
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &.secondary {
+    background: $color-bg-hover;
+    color: $color-primary;
+  }
+}
+
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: #fef3c7;
+  border-radius: $radius-md;
+  margin-top: $spacing-md;
+}
+
+.tipIcon {
+  font-size: $font-size-lg;
+  flex-shrink: 0;
+}
+
+.tipText {
+  font-size: $font-size-sm;
+  color: #92400e;
+  line-height: 1.6;
+}
