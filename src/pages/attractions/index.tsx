@@ -20,9 +20,9 @@ const AttractionsPage: React.FC = () => {
   }, [trip.days]);
 
   const handleEditTrip = () => {
-    console.log('[Attractions] 编辑行程');
+    console.log('[Attractions] 编辑行程信息');
     Taro.navigateTo({
-      url: '/pages/trip-edit/index'
+      url: '/pages/trip-info-edit/index'
     });
   };
 

@@ -17,7 +17,7 @@ const categoryIcons: Record<ExpenseCategory, string> = {
 };
 
 const ExpensePage: React.FC = () => {
-  const { expenses, getTotalExpense, getExpenseByCategory, addExpense, removeExpense, autoGenerateExpenses } = useTripStore();
+  const { trip, expenses, getTotalExpense, getExpenseByCategory, addExpense, removeExpense, autoGenerateExpenses } = useTripStore();
   const [showAddModal, setShowAddModal] = useState(false);
   const [form, setForm] = useState({
     category: 'ticket' as ExpenseCategory,
@@ -28,6 +28,7 @@ const ExpensePage: React.FC = () => {
 
   const total = getTotalExpense();
   const byCategory = getExpenseByCategory();
+  const totalDays = trip.days.length;
 
   const sortedExpenses = useMemo(() => {
     return [...expenses].sort((a, b) => {
@@ -114,7 +115,7 @@ const ExpensePage: React.FC = () => {
     });
   };
 
-  const averagePerDay = total > 0 ? Math.round(total / 5) : 0;
+  const averagePerDay = total > 0 ? Math.round(total / Math.max(totalDays, 1)) : 0;
 
   return (
     <View className={styles.page}>

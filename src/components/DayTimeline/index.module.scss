@@ -132,6 +132,12 @@
   &.danger {
     color: $color-error;
   }
+
+  &.sort {
+    flex: 0 0 72rpx;
+    background: $color-primary-light;
+    color: #fff;
+  }
 }
 
 .hotelCard {

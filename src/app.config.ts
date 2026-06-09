@@ -7,7 +7,8 @@ export default defineAppConfig({
     'pages/memo/index',
     'pages/attraction-detail/index',
     'pages/trip-edit/index',
-    'pages/hotel-edit/index'
+    'pages/hotel-edit/index',
+    'pages/trip-info-edit/index'
   ],
   window: {
     backgroundTextStyle: 'light',

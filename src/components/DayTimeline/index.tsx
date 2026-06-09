@@ -12,7 +12,7 @@ interface DayTimelineProps {
 }
 
 const DayTimeline: React.FC<DayTimelineProps> = ({ dayPlan, onEditSlot }) => {
-  const { removeTimeSlot, removeHotel } = useTripStore();
+  const { removeTimeSlot, removeHotel, moveTimeSlot } = useTripStore();
 
   const handleRemoveSlot = (slotId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -48,6 +48,18 @@ const DayTimeline: React.FC<DayTimelineProps> = ({ dayPlan, onEditSlot }) => {
     });
   };
 
+  const handleMoveUp = (slotId: string, index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (index === 0) return;
+    moveTimeSlot(dayPlan.date, slotId, 'up');
+  };
+
+  const handleMoveDown = (slotId: string, index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (index === dayPlan.timeSlots.length - 1) return;
+    moveTimeSlot(dayPlan.date, slotId, 'down');
+  };
+
   return (
     <View>
       {dayPlan.hotel && (
@@ -75,7 +87,7 @@ const DayTimeline: React.FC<DayTimelineProps> = ({ dayPlan, onEditSlot }) => {
       ) : (
         <View className={styles.timeline}>
           <View className={styles.timelineLine} />
-          {dayPlan.timeSlots.map((slot) => (
+          {dayPlan.timeSlots.map((slot, index) => (
             <View key={slot.id} className={styles.slot}>
               <View className={classnames(styles.slotDot, styles[slot.period])} />
               <View className={styles.slotCard}>
@@ -99,6 +111,20 @@ const DayTimeline: React.FC<DayTimelineProps> = ({ dayPlan, onEditSlot }) => {
                   )}
                 </View>
                 <View className={styles.slotActions}>
+                  <Button
+                    className={classnames(styles.actionBtn, styles.sort)}
+                    onClick={(e) => handleMoveUp(slot.id, index, e)}
+                    disabled={index === 0}
+                  >
+                    ↑
+                  </Button>
+                  <Button
+                    className={classnames(styles.actionBtn, styles.sort)}
+                    onClick={(e) => handleMoveDown(slot.id, index, e)}
+                    disabled={index === dayPlan.timeSlots.length - 1}
+                  >
+                    ↓
+                  </Button>
                   <Button
                     className={styles.actionBtn}
                     onClick={() => onEditSlot?.(slot.id)}
