@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Button, Input, Switch } from '@tarojs/components';
+import { View, Text, Button, Input, Switch, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import ExpenseChart from '@/components/ExpenseChart';
 import { useTripStore } from '@/store/useTripStore';
-import { EXPENSE_CATEGORY_MAP, type ExpenseCategory, type ExpenseItem } from '@/types';
+import { EXPENSE_CATEGORY_MAP, type ExpenseCategory, type ExpenseItem, type SettlementFilter, type Settlement } from '@/types';
 import { formatDateCN } from '@/utils';
 import styles from './index.module.scss';
 
@@ -28,6 +28,7 @@ const ExpensePage: React.FC = () => {
   const {
     trip,
     expenses,
+    checklist,
     getTotalExpense,
     getExpenseByCategory,
     getBudgetByCategory,
@@ -40,15 +41,21 @@ const ExpensePage: React.FC = () => {
     getAAData,
     getSettlementSuggestions,
     markSettlement,
-    clearAllSettlements
+    clearAllSettlements,
+    recalculateSettlements
   } = useTripStore();
 
   const [activeTab, setActiveTab] = useState('detail');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showExpenseBreakdown, setShowExpenseBreakdown] = useState<string | null>(null);
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(null);
   const [editingBudget, setEditingBudget] = useState<string | null>(null);
   const [budgetInput, setBudgetInput] = useState('');
+  const [settlementFilter, setSettlementFilter] = useState<SettlementFilter>({});
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedExpenseIds, setSelectedExpenseIds] = useState<string[]>([]);
   const [form, setForm] = useState({
     category: 'ticket' as ExpenseCategory,
     name: '',
@@ -63,8 +70,8 @@ const ExpensePage: React.FC = () => {
   const budget = getBudgetByCategory();
   const totalBudget = getTotalBudget();
   const totalDays = trip.days.length;
-  const aaData = getAAData();
-  const settlements = getSettlementSuggestions();
+  const aaData = getAAData(settlementFilter);
+  const settlements = getSettlementSuggestions(settlementFilter);
 
   const averagePerDay = total > 0 ? Math.round(total / Math.max(totalDays, 1)) : 0;
   const budgetAvgPerDay = totalBudget > 0 ? Math.round(totalBudget / Math.max(totalDays, 1)) : 0;
@@ -208,6 +215,41 @@ const ExpensePage: React.FC = () => {
     });
   };
 
+  const handleClearFilter = () => {
+    setSettlementFilter({});
+    setSelectedCategories([]);
+    setSelectedExpenseIds([]);
+  };
+
+  const handleApplyFilter = () => {
+    const filter: SettlementFilter = {};
+    if (selectedCategories.length > 0) {
+      filter.categories = selectedCategories;
+    }
+    if (selectedExpenseIds.length > 0) {
+      filter.expenseIds = selectedExpenseIds;
+    }
+    setSettlementFilter(filter);
+    setShowFilterModal(false);
+    Taro.showToast({ title: '已应用筛选', icon: 'success' });
+  };
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const toggleExpense = (expenseId: string) => {
+    setSelectedExpenseIds(prev => 
+      prev.includes(expenseId) 
+        ? prev.filter(id => id !== expenseId)
+        : [...prev, expenseId]
+    );
+  };
+
   const handleExport = () => {
     let content = `【${trip.name}】费用报表\n\n`;
     content += `📌 目的地：${trip.destination}\n`;
@@ -224,6 +266,23 @@ const ExpensePage: React.FC = () => {
       const catBudget = budget[key as ExpenseCategory];
       content += `${config.label}: 预算¥${catBudget} / 已花¥${spent} / 剩余¥${catBudget - spent}\n`;
     });
+
+    content += `\n--- 住宿明细 ---\n`;
+    const hasHotel = trip.days.some(d => d.hotel?.name);
+    if (!hasHotel) {
+      content += `暂无住宿安排\n`;
+    } else {
+      trip.days.forEach(day => {
+        if (day.hotel?.name) {
+          content += `${day.dateStr}: ${day.hotel.name} - ¥${day.hotel.price}/晚`;
+          const hotelExpense = expenses.find(e => e.category === 'hotel' && e.date === day.date);
+          if (hotelExpense?.paidBy) {
+            content += ` (${getTravelerName(hotelExpense.paidBy)}垫付)`;
+          }
+          content += `\n`;
+        }
+      });
+    }
 
     content += `\n--- 费用明细 ---\n`;
     sortedExpenses.forEach(e => {
@@ -255,18 +314,43 @@ const ExpensePage: React.FC = () => {
         }
       });
 
-      content += `\n--- 结算建议 ---\n`;
+      content += `\n--- 待结算摘要 ---\n`;
       if (settlements.length === 0) {
         content += `🎉 所有费用已结清！\n`;
       } else {
-        settlements.forEach(s => {
+        const unsettled = settlements.filter(s => !s.isSettled);
+        const settled = settlements.filter(s => s.isSettled);
+        content += `待结算 ${unsettled.length} 笔，合计 ¥${totalUnsettledAmount.toFixed(2)}\n`;
+        content += `已结算 ${settled.length} 笔，合计 ¥${totalSettledAmount.toFixed(2)}\n\n`;
+        unsettled.forEach(s => {
           const fromName = getTravelerName(s.from);
           const toName = getTravelerName(s.to);
-          content += `${fromName} → ${toName}: ¥${s.amount.toFixed(2)} ${s.isSettled ? '✅已结清' : '⏳待结算'}\n`;
+          content += `  ${fromName} → ${toName}: ¥${s.amount.toFixed(2)}\n`;
         });
-        content += `\n已结清: ¥${totalSettledAmount.toFixed(2)}\n`;
-        content += `待结算: ¥${totalUnsettledAmount.toFixed(2)}\n`;
       }
+    }
+
+    content += `\n--- 分工摘要 ---\n`;
+    const hasRoles = trip.travelers.some(t => t.expenseRoles?.length || t.assignedChecklistItems?.length);
+    if (!hasRoles) {
+      content += `暂无分工安排\n`;
+    } else {
+      trip.travelers.forEach(traveler => {
+        content += `\n👤 ${traveler.name} (${traveler.role}):\n`;
+        if (traveler.expenseRoles?.length) {
+          const roleNames = traveler.expenseRoles.map(r => EXPENSE_CATEGORY_MAP[r]?.label || r).join('、');
+          content += `  💰 费用负责: ${roleNames}\n`;
+        }
+        if (traveler.assignedChecklistItems?.length) {
+          const assignedItems = traveler.assignedChecklistItems.map(id => {
+            const item = checklist.find(c => c.id === id);
+            return item ? `${item.name}${item.checked ? ' ✓' : ''}` : '';
+          }).filter(Boolean);
+          const completed = assignedItems.filter(i => i.includes('✓')).length;
+          content += `  🎒 负责物品: ${assignedItems.join('、')}\n`;
+          content += `  📊 完成进度: ${completed}/${traveler.assignedChecklistItems.length}\n`;
+        }
+      });
     }
 
     Taro.setClipboardData({
@@ -502,6 +586,25 @@ const ExpensePage: React.FC = () => {
               </View>
             ) : (
               <View>
+                <View className={styles.filterBar}>
+                  <Button className={styles.filterBtn} onClick={() => setShowFilterModal(true)}>
+                    🔍 筛选
+                    {(selectedCategories.length > 0 || selectedExpenseIds.length > 0) && (
+                      <Text className={styles.filterBadge}>
+                        {selectedCategories.length + selectedExpenseIds.length}
+                      </Text>
+                    )}
+                  </Button>
+                  {(selectedCategories.length > 0 || selectedExpenseIds.length > 0) && (
+                    <Button className={styles.clearFilterBtn} onClick={handleClearFilter}>
+                      清除筛选
+                    </Button>
+                  )}
+                  <Button className={styles.recalcBtn} onClick={recalculateSettlements}>
+                    🔄 重新计算
+                  </Button>
+                </View>
+
                 <View className={styles.settlementSummary}>
                   <View className={styles.summaryItem}>
                     <Text className={styles.summaryNum}>{settlements.length}</Text>
@@ -552,8 +655,41 @@ const ExpensePage: React.FC = () => {
                               <Text className={styles.personName}>{getTravelerName(settlement.to)}</Text>
                             </View>
                           </View>
-                          <Text className={styles.settleAmount}>¥{settlement.amount.toFixed(2)}</Text>
+                          <View className={styles.settlementRight}>
+                            <Text className={styles.settleAmount}>¥{settlement.amount.toFixed(2)}</Text>
+                            {settlement.expenseBreakdown && settlement.expenseBreakdown.length > 0 && (
+                              <Button 
+                                className={styles.breakdownBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowExpenseBreakdown(showExpenseBreakdown === settlement.id ? null : settlement.id);
+                                }}
+                              >
+                                {showExpenseBreakdown === settlement.id ? '收起明细' : '查看明细'}
+                              </Button>
+                            )}
+                          </View>
                         </View>
+                        
+                        {showExpenseBreakdown === settlement.id && settlement.expenseBreakdown && (
+                          <View className={styles.breakdownList}>
+                            {settlement.expenseBreakdown.map((item, idx) => (
+                              <View key={idx} className={styles.breakdownItem}>
+                                <View className={styles.breakdownLeft}>
+                                  <Text className={styles.breakdownIcon}>
+                                    {categoryIcons[item.category as ExpenseCategory]}
+                                  </Text>
+                                  <View className={styles.breakdownInfo}>
+                                    <Text className={styles.breakdownName}>{item.expenseName}</Text>
+                                    <Text className={styles.breakdownTotal}>总金额 ¥{item.amount.toFixed(2)}</Text>
+                                  </View>
+                                </View>
+                                <Text className={styles.breakdownShare}>分摊 ¥{item.share.toFixed(2)}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+
                         <View className={styles.settlementActions}>
                           <Switch
                             checked={settlement.isSettled}
@@ -667,7 +803,16 @@ const ExpensePage: React.FC = () => {
                   <Button
                     key={key}
                     className={classnames(styles.categoryOption, form.category === key && styles.active)}
-                    onClick={() => setForm({ ...form, category: key })}
+                    onClick={() => {
+                      const responsibleTraveler = trip.travelers.find(t => 
+                        t.expenseRoles?.includes(key)
+                      );
+                      setForm({ 
+                        ...form, 
+                        category: key,
+                        paidBy: responsibleTraveler?.id || form.paidBy
+                      });
+                    }}
                   >
                     <Text className={styles.icon}>{categoryIcons[key]}</Text>
                     <Text className={styles.label}>{config.label}</Text>
@@ -707,16 +852,26 @@ const ExpensePage: React.FC = () => {
                   <View className={styles.avatar}>无</View>
                   <Text className={styles.name}>无需标记</Text>
                 </Button>
-                {trip.travelers.map(traveler => (
-                  <Button
-                    key={traveler.id}
-                    className={classnames(styles.travelerOption, form.paidBy === traveler.id && styles.active)}
-                    onClick={() => setForm({ ...form, paidBy: traveler.id })}
-                  >
-                    <View className={styles.avatar}>{traveler.name.charAt(0)}</View>
-                    <Text className={styles.name}>{traveler.name}</Text>
-                  </Button>
-                ))}
+                {trip.travelers.map(traveler => {
+                  const isRecommended = traveler.expenseRoles?.includes(form.category);
+                  return (
+                    <Button
+                      key={traveler.id}
+                      className={classnames(
+                        styles.travelerOption, 
+                        form.paidBy === traveler.id && styles.active,
+                        isRecommended && styles.recommended
+                      )}
+                      onClick={() => setForm({ ...form, paidBy: traveler.id })}
+                    >
+                      <View className={styles.avatar}>{traveler.name.charAt(0)}</View>
+                      <Text className={styles.name}>
+                        {traveler.name}
+                        {isRecommended && <Text className={styles.recommendTag}> 推荐</Text>}
+                      </Text>
+                    </Button>
+                  );
+                })}
               </View>
             </View>
 
@@ -757,6 +912,75 @@ const ExpensePage: React.FC = () => {
               </Button>
               <Button className={`${styles.modalBtn} ${styles.confirm}`} onClick={handleSave}>
                 {showEditModal ? '更新' : '保存'}
+              </Button>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {showFilterModal && (
+        <View className={styles.modal} onClick={() => setShowFilterModal(false)}>
+          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>筛选结算费用</Text>
+
+            <View className={styles.formItem}>
+              <Text className={styles.formLabel}>按类别筛选</Text>
+              <View className={styles.categoryGrid}>
+                {(Object.entries(EXPENSE_CATEGORY_MAP) as [ExpenseCategory, { label: string; color: string }][]).map(([key, config]) => (
+                  <Button
+                    key={key}
+                    className={classnames(
+                      styles.categoryOption,
+                      selectedCategories.includes(key) && styles.active
+                    )}
+                    onClick={() => toggleCategory(key)}
+                  >
+                    <Text className={styles.icon}>{categoryIcons[key]}</Text>
+                    <Text className={styles.label}>{config.label}</Text>
+                  </Button>
+                ))}
+              </View>
+            </View>
+
+            <View className={styles.formItem}>
+              <Text className={styles.formLabel}>按费用选择</Text>
+              <ScrollView scrollY className={styles.expenseSelectList}>
+                {expenses.filter(e => e.isAA !== false).map(expense => (
+                  <Button
+                    key={expense.id}
+                    className={classnames(
+                      styles.expenseSelectItem,
+                      selectedExpenseIds.includes(expense.id) && styles.active
+                    )}
+                    onClick={() => toggleExpense(expense.id)}
+                  >
+                    <View className={styles.expenseSelectLeft}>
+                      <Text className={styles.breakdownIcon}>
+                        {categoryIcons[expense.category]}
+                      </Text>
+                      <View className={styles.expenseSelectInfo}>
+                        <Text className={styles.expenseSelectName}>{expense.name}</Text>
+                        <Text className={styles.expenseSelectMeta}>
+                          {EXPENSE_CATEGORY_MAP[expense.category].label}
+                          {expense.paidBy && ` · ${getTravelerName(expense.paidBy)}垫付`}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text className={styles.expenseSelectAmount}>¥{expense.amount}</Text>
+                  </Button>
+                ))}
+              </ScrollView>
+            </View>
+
+            <View className={styles.modalActions}>
+              <Button
+                className={`${styles.modalBtn} ${styles.cancel}`}
+                onClick={() => setShowFilterModal(false)}
+              >
+                取消
+              </Button>
+              <Button className={`${styles.modalBtn} ${styles.confirm}`} onClick={handleApplyFilter}>
+                应用筛选
               </Button>
             </View>
           </View>

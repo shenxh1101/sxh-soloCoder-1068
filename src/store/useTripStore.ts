@@ -14,7 +14,8 @@ import type {
   Budget,
   ExpenseCategory,
   Settlement,
-  AAData
+  AAData,
+  SettlementFilter
 } from '@/types';
 
 interface TripState {
@@ -64,10 +65,11 @@ interface TripState {
   getTotalExpense: () => number;
   getExpenseByCategory: () => Record<string, number>;
   autoGenerateExpenses: () => void;
-  getAAData: () => AAData[];
-  getSettlementSuggestions: () => Settlement[];
+  getAAData: (filter?: SettlementFilter) => AAData[];
+  getSettlementSuggestions: (filter?: SettlementFilter) => Settlement[];
   markSettlement: (settlementId: string, isSettled: boolean) => void;
   clearAllSettlements: () => void;
+  recalculateSettlements: () => void;
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
@@ -317,12 +319,10 @@ export const useTripStore = create<TripState>()(
       }),
 
       removeHotel: (date) => set((state) => {
-        const existingHotelExpense = state.expenses.find(
+        const existingHotelExpenses = state.expenses.filter(
           e => e.category === 'hotel' && e.date === date
         );
-        if (existingHotelExpense) {
-          get().removeExpense(existingHotelExpense.id);
-        }
+        existingHotelExpenses.forEach(e => get().removeExpense(e.id));
 
         return {
           trip: {
@@ -334,19 +334,40 @@ export const useTripStore = create<TripState>()(
         };
       }),
 
-      addExpense: (expense) => set((state) => ({
-        expenses: [...state.expenses, { ...expense, id: generateId() }]
-      })),
+      addExpense: (expense) => set((state) => {
+        const newExpenses = [...state.expenses, { ...expense, id: generateId() }];
+        
+        setTimeout(() => {
+          get().recalculateSettlements();
+        }, 0);
 
-      removeExpense: (id) => set((state) => ({
-        expenses: state.expenses.filter(e => e.id !== id)
-      })),
+        return { expenses: newExpenses };
+      }),
 
-      updateExpense: (id, updates) => set((state) => ({
-        expenses: state.expenses.map(e =>
+      removeExpense: (id) => set((state) => {
+        const newExpenses = state.expenses.filter(e => e.id !== id);
+        
+        setTimeout(() => {
+          get().recalculateSettlements();
+        }, 0);
+
+        return { expenses: newExpenses };
+      }),
+
+      updateExpense: (id, updates) => set((state) => {
+        const newExpenses = state.expenses.map(e =>
           e.id === id ? { ...e, ...updates } : e
-        )
-      })),
+        );
+        const hasSignificantChange = updates.amount !== undefined || updates.category !== undefined || updates.paidBy !== undefined || updates.isAA !== undefined;
+        
+        if (hasSignificantChange) {
+          setTimeout(() => {
+            get().recalculateSettlements();
+          }, 0);
+        }
+
+        return { expenses: newExpenses };
+      }),
 
       clearExpenses: () => set({ expenses: [] }),
 
@@ -438,10 +459,30 @@ export const useTripStore = create<TripState>()(
         });
       },
 
-      getAAData: () => {
-        const { trip, expenses, getTotalExpense } = get();
+      getAAData: (filter?: SettlementFilter) => {
+        const { trip, expenses } = get();
         const travelers = trip.travelers;
-        const aaExpenses = expenses.filter(e => e.isAA !== false);
+
+        let aaExpenses = expenses.filter(e => e.isAA !== false);
+
+        if (filter) {
+          if (filter.categories && filter.categories.length > 0) {
+            aaExpenses = aaExpenses.filter(e => filter.categories!.includes(e.category));
+          }
+          if (filter.expenseIds && filter.expenseIds.length > 0) {
+            aaExpenses = aaExpenses.filter(e => filter.expenseIds!.includes(e.id));
+          }
+          if (filter.travelerIds && filter.travelerIds.length > 0) {
+            aaExpenses = aaExpenses.filter(e => filter.travelerIds!.includes(e.paidBy!));
+          }
+          if (filter.startDate) {
+            aaExpenses = aaExpenses.filter(e => (e.date || '') >= filter.startDate!);
+          }
+          if (filter.endDate) {
+            aaExpenses = aaExpenses.filter(e => (e.date || '') <= filter.endDate!);
+          }
+        }
+
         const total = aaExpenses.reduce((sum, e) => sum + e.amount, 0);
         const perPerson = travelers.length > 0 ? total / travelers.length : 0;
 
@@ -461,10 +502,31 @@ export const useTripStore = create<TripState>()(
         });
       },
 
-      getSettlementSuggestions: () => {
-        const { trip, getAAData } = get();
-        const aaData = getAAData();
-        const travelers = trip.travelers;
+      getSettlementSuggestions: (filter?: SettlementFilter) => {
+        const { trip, getAAData, expenses, travelers } = get();
+
+        let filteredExpenses = expenses.filter(e => e.isAA !== false);
+        if (filter) {
+          if (filter.categories && filter.categories.length > 0) {
+            filteredExpenses = filteredExpenses.filter(e => filter.categories!.includes(e.category));
+          }
+          if (filter.expenseIds && filter.expenseIds.length > 0) {
+            filteredExpenses = filteredExpenses.filter(e => filter.expenseIds!.includes(e.id));
+          }
+          if (filter.travelerIds && filter.travelerIds.length > 0) {
+            filteredExpenses = filteredExpenses.filter(e => filter.travelerIds!.includes(e.paidBy!));
+          }
+          if (filter.startDate) {
+            filteredExpenses = filteredExpenses.filter(e => (e.date || '') >= filter.startDate!);
+          }
+          if (filter.endDate) {
+            filteredExpenses = filteredExpenses.filter(e => (e.date || '') <= filter.endDate!);
+          }
+        }
+
+        const aaData = getAAData(filter);
+        const travelerCount = trip.travelers.length;
+        const perPersonShare = travelerCount > 0 ? 1 / travelerCount : 0;
 
         const debtors = aaData.filter(d => d.diff < 0).map(d => ({ ...d, diff: Math.abs(d.diff) }));
         const creditors = aaData.filter(d => d.diff > 0);
@@ -483,13 +545,27 @@ export const useTripStore = create<TripState>()(
                 s => s.from === debtor.travelerId && s.to === creditor.travelerId
               );
 
+              const creditorPaidExpenses = filteredExpenses.filter(e => e.paidBy === creditor.travelerId);
+              const expenseBreakdown = creditorPaidExpenses.map(expense => {
+                const share = Math.round(expense.amount * perPersonShare * 100) / 100;
+                return {
+                  expenseId: expense.id,
+                  expenseName: expense.name,
+                  category: expense.category,
+                  amount: expense.amount,
+                  share
+                };
+              }).filter(b => b.share > 0.01);
+
               suggestions.push({
                 id: existingSettlement?.id || generateId(),
                 from: debtor.travelerId,
                 to: creditor.travelerId,
                 amount: Math.round(amount * 100) / 100,
                 isSettled: existingSettlement?.isSettled || false,
-                settledAt: existingSettlement?.settledAt
+                settledAt: existingSettlement?.settledAt,
+                expenseIds: expenseBreakdown.map(b => b.expenseId),
+                expenseBreakdown
               });
 
               remaining -= amount;
@@ -500,6 +576,34 @@ export const useTripStore = create<TripState>()(
 
         return suggestions;
       },
+
+      recalculateSettlements: () => set((state) => {
+        const suggestions = get().getSettlementSuggestions();
+        const existingSettlements = state.trip.settlements;
+
+        const updatedSettlements = suggestions.map(suggestion => {
+          const existing = existingSettlements.find(e =>
+            e.from === suggestion.from && e.to === suggestion.to
+          );
+
+          if (existing && Math.abs(existing.amount - suggestion.amount) < 0.01) {
+            return existing;
+          }
+
+          return {
+            ...suggestion,
+            isSettled: false,
+            settledAt: undefined
+          };
+        });
+
+        return {
+          trip: {
+            ...state.trip,
+            settlements: updatedSettlements
+          }
+        };
+      }),
 
       markSettlement: (settlementId, isSettled) => set((state) => {
         const existingIndex = state.trip.settlements.findIndex(s => s.id === settlementId);

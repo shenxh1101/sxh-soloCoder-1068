@@ -347,14 +347,37 @@ const MemoPage: React.FC = () => {
                       <Text className={styles.itemsLabel}>负责物品：</Text>
                       <View className={styles.itemTags}>
                         {assignedItems.slice(0, 3).map(item => (
-                          <Text key={item.id} className={styles.itemTag}>
-                            {item.name}
+                          <Text key={item.id} className={classnames(styles.itemTag, item.checked && styles.completed)}>
+                            {item.checked && '✓ '}{item.name}
                           </Text>
                         ))}
                         {assignedItems.length > 3 && (
                           <Text className={styles.itemTag}>+{assignedItems.length - 3}项</Text>
                         )}
                       </View>
+                      <View className={styles.progressRow}>
+                        <Text className={styles.progressLabel}>
+                          📊 进度：{assignedItems.filter(i => i.checked).length}/{assignedItems.length}
+                        </Text>
+                        {assignedItems.filter(i => !i.checked).length > 0 && (
+                          <Text className={styles.remainingCount}>
+                            剩余 {assignedItems.filter(i => !i.checked).length} 项未完成
+                          </Text>
+                        )}
+                      </View>
+                      {assignedItems.filter(i => !i.checked).length > 0 && (
+                        <View className={styles.uncompletedList}>
+                          <Text className={styles.uncompletedLabel}>待完成：</Text>
+                          {assignedItems.filter(i => !i.checked).slice(0, 3).map(item => (
+                            <Text key={item.id} className={styles.uncompletedItem}>
+                              ⏰ {item.name}
+                            </Text>
+                          ))}
+                          {assignedItems.filter(i => !i.checked).length > 3 && (
+                            <Text className={styles.uncompletedItem}>还有 {assignedItems.filter(i => !i.checked).length - 3} 项...</Text>
+                          )}
+                        </View>
+                      )}
                     </View>
                   )}
                   <View className={styles.travelerActions}>

@@ -1,0 +1,563 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, $color-bg-page 0%, #ffffff 100%);
+  padding-bottom: 140rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl;
+  color: $color-text-white;
+}
+
+.tripName {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-sm;
+}
+
+.tripMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-lg;
+  font-size: $font-size-sm;
+  opacity: 0.95;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.summaryCard {
+  margin: -20rpx $page-padding 0;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-card;
+  position: relative;
+  z-index: 2;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.summaryLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.summaryAmount {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.section {
+  padding: 0 $page-padding;
+  margin-top: $spacing-xl;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.dayCard {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-lg;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.dayInfo {
+  flex: 1;
+}
+
+.dayTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.dayStats {
+  display: flex;
+  gap: $spacing-md;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.expandIcon {
+  font-size: $font-size-lg;
+  color: $color-text-secondary;
+  transition: transform $transition-base;
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
+}
+
+.dayContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height $transition-base ease;
+
+  &.expanded {
+    max-height: 2000rpx;
+  }
+}
+
+.dayInner {
+  padding: 0 $spacing-lg $spacing-lg;
+}
+
+.contentSection {
+  margin-bottom: $spacing-lg;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.contentTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.attractionList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.attractionItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+}
+
+.timeSlot {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  flex-shrink: 0;
+  width: 100rpx;
+}
+
+.attractionName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  flex: 1;
+}
+
+.hotelInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: $radius-sm;
+}
+
+.hotelIcon {
+  font-size: $font-size-lg;
+}
+
+.hotelDetail {
+  flex: 1;
+}
+
+.hotelName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.hotelPrice {
+  font-size: $font-size-xs;
+  color: $color-warning;
+  margin-top: 4rpx;
+}
+
+.dayExpense {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background: rgba(37, 99, 235, 0.05);
+  border-radius: $radius-sm;
+}
+
+.expenseInfo {
+  .label {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  .value {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+  }
+}
+
+.todoList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.todoItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: rgba(245, 158, 11, 0.05);
+  border-radius: $radius-sm;
+
+  &.completed {
+    opacity: 0.5;
+    background: $color-bg-hover;
+  }
+}
+
+.todoCheckbox {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: $radius-sm;
+  border: 2rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  color: $color-text-white;
+  flex-shrink: 0;
+
+  .completed & {
+    background: $color-success;
+    border-color: $color-success;
+  }
+}
+
+.todoName {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+
+  .completed & {
+    text-decoration: line-through;
+    color: $color-text-tertiary;
+  }
+}
+
+.todoAssignee {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.travelerSection {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.travelerCard {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.travelerAvatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.travelerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.travelerName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.travelerRole {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.travelerStats {
+  display: flex;
+  gap: $spacing-md;
+  font-size: $font-size-xs;
+}
+
+.statLabel {
+  color: $color-text-secondary;
+}
+
+.statValue {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.expenseRoles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: $spacing-xs;
+}
+
+.roleTag {
+  padding: 4rpx 12rpx;
+  background: rgba(37, 99, 235, 0.1);
+  color: $color-primary;
+  border-radius: $radius-round;
+  font-size: 20rpx;
+}
+
+.settlementSection {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.settlementItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-sm;
+
+  &.settled {
+    opacity: 0.6;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.settlementFlow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.personAvatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: $color-primary;
+  color: $color-text-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+}
+
+.personName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.arrow {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.settlementAmount {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.statusBadge {
+  padding: 4rpx 12rpx;
+  border-radius: $radius-round;
+  font-size: 20rpx;
+
+  &.settled {
+    background: rgba(16, 185, 129, 0.1);
+    color: $color-success;
+  }
+
+  &.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: $color-warning;
+  }
+}
+
+.hotelList {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.hotelListItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.hotelListInfo {
+  .date {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  .name {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-top: 4rpx;
+  }
+}
+
+.hotelListPrice {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-warning;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: $color-bg-card;
+  padding: $spacing-lg $page-padding;
+  padding-bottom: calc(#{$spacing-lg} + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: $spacing-md;
+}
+
+.bottomBtn {
+  @include button-reset;
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+
+  &.secondary {
+    background: $color-bg-secondary;
+    color: $color-text-secondary;
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+}
+
+.emptyState {
+  padding: $spacing-xxl $spacing-xl;
+  text-align: center;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  border: 2rpx dashed $color-border;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.emptyText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

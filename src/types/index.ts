@@ -68,6 +68,21 @@ export interface Settlement {
   isSettled: boolean;
   settledAt?: string;
   expenseIds?: string[];
+  expenseBreakdown?: Array<{
+    expenseId: string;
+    expenseName: string;
+    category: string;
+    amount: number;
+    share: number;
+  }>;
+}
+
+export interface SettlementFilter {
+  categories?: string[];
+  expenseIds?: string[];
+  travelerIds?: string[];
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface AAData {

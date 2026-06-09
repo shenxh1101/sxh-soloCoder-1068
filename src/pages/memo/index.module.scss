@@ -610,3 +610,50 @@
   color: $color-text-secondary;
   flex-shrink: 0;
 }
+
+.itemTag {
+  &.completed {
+    opacity: 0.6;
+    text-decoration: line-through;
+  }
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.progressLabel {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.remainingCount {
+  font-size: $font-size-xs;
+  color: $color-warning;
+}
+
+.uncompletedList {
+  margin-top: $spacing-sm;
+  padding: $spacing-sm;
+  background: rgba(245, 158, 11, 0.05);
+  border-radius: $radius-sm;
+}
+
+.uncompletedLabel {
+  font-size: 20rpx;
+  color: $color-text-secondary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.uncompletedItem {
+  font-size: 20rpx;
+  color: $color-warning;
+  display: inline-block;
+  margin-right: $spacing-sm;
+  margin-bottom: 4rpx;
+}

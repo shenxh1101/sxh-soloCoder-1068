@@ -159,16 +159,20 @@ const CalendarPage: React.FC = () => {
     const content = generateFullShareContent();
 
     Taro.showActionSheet({
-      itemList: ['复制完整行程', '仅复制每日安排', '生成图片分享'],
+      itemList: ['打开分享预览页', '复制完整行程', '仅复制每日安排', '生成图片分享'],
       success: async (res) => {
         if (res.tapIndex === 0) {
+          Taro.navigateTo({
+            url: '/pages/share-preview/index'
+          });
+        } else if (res.tapIndex === 1) {
           const success = await copyToClipboard(content);
           if (success) {
             Taro.showToast({ title: '已复制到剪贴板', icon: 'success' });
           } else {
             Taro.showToast({ title: '复制失败，请手动复制', icon: 'none' });
           }
-        } else if (res.tapIndex === 1) {
+        } else if (res.tapIndex === 2) {
           const simpleContent = `【${trip.name}】\n\n` + trip.days.map(day => {
             let line = `${day.dateStr}\n`;
             if (day.timeSlots.length > 0) {

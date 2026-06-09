@@ -8,7 +8,8 @@ export default defineAppConfig({
     'pages/attraction-detail/index',
     'pages/trip-edit/index',
     'pages/hotel-edit/index',
-    'pages/trip-info-edit/index'
+    'pages/trip-info-edit/index',
+    'pages/share-preview/index'
   ],
   window: {
     backgroundTextStyle: 'light',
