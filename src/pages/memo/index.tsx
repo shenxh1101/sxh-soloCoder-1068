@@ -5,13 +5,37 @@ import classnames from 'classnames';
 import ChecklistItem from '@/components/ChecklistItem';
 import { useTripStore } from '@/store/useTripStore';
 import { getChecklistProgress, formatDateCN } from '@/utils';
+import { EXPENSE_CATEGORY_MAP, type ExpenseCategory, type Traveler } from '@/types';
 import styles from './index.module.scss';
 
+const expenseCategoryIcons: Record<ExpenseCategory, string> = {
+  ticket: '🎫',
+  transport: '🚗',
+  hotel: '🏨',
+  food: '🍜',
+  shopping: '🛍️',
+  other: '📦'
+};
+
 const MemoPage: React.FC = () => {
-  const { trip, checklist, toggleChecklistItem, addChecklistItem, addTraveler, removeTraveler } = useTripStore();
+  const {
+    trip,
+    checklist,
+    toggleChecklistItem,
+    addChecklistItem,
+    addTraveler,
+    removeTraveler,
+    updateTravelerExpenseRoles,
+    assignChecklistItemToTraveler,
+    unassignChecklistItemFromTraveler
+  } = useTripStore();
   const [activeCategory, setActiveCategory] = useState('全部');
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [showAddTravelerModal, setShowAddTravelerModal] = useState(false);
+  const [showEditRolesModal, setShowEditRolesModal] = useState(false);
+  const [showAssignItemsModal, setShowAssignItemsModal] = useState(false);
+  const [editingTraveler, setEditingTraveler] = useState<Traveler | null>(null);
+  const [selectedRoles, setSelectedRoles] = useState<ExpenseCategory[]>([]);
   const [newItem, setNewItem] = useState({ name: '', category: '衣物' });
   const [newTraveler, setNewTraveler] = useState({ name: '', role: '', tasks: '' });
 
@@ -58,6 +82,48 @@ const MemoPage: React.FC = () => {
     setShowAddTravelerModal(false);
     setNewTraveler({ name: '', role: '', tasks: '' });
     Taro.showToast({ title: '已添加', icon: 'success' });
+  };
+
+  const handleEditRoles = (traveler: Traveler) => {
+    setEditingTraveler(traveler);
+    setSelectedRoles(traveler.expenseRoles || []);
+    setShowEditRolesModal(true);
+  };
+
+  const handleSaveRoles = () => {
+    if (!editingTraveler) return;
+    updateTravelerExpenseRoles(editingTraveler.id, selectedRoles);
+    setShowEditRolesModal(false);
+    setEditingTraveler(null);
+    Taro.showToast({ title: '已保存', icon: 'success' });
+  };
+
+  const handleAssignItems = (traveler: Traveler) => {
+    setEditingTraveler(traveler);
+    setShowAssignItemsModal(true);
+  };
+
+  const handleToggleItemAssignment = (itemId: string) => {
+    if (!editingTraveler) return;
+    const assigned = editingTraveler.assignedChecklistItems || [];
+    if (assigned.includes(itemId)) {
+      unassignChecklistItemFromTraveler(editingTraveler.id, itemId);
+    } else {
+      assignChecklistItemToTraveler(editingTraveler.id, itemId);
+    }
+  };
+
+  const getAssignedItemsForTraveler = (travelerId: string) => {
+    const traveler = trip.travelers.find(t => t.id === travelerId);
+    const assigned = traveler?.assignedChecklistItems || [];
+    return checklist.filter(item => assigned.includes(item.id));
+  };
+
+  const getItemAssignee = (itemId: string) => {
+    const traveler = trip.travelers.find(t =>
+      (t.assignedChecklistItems || []).includes(itemId)
+    );
+    return traveler;
   };
 
   const handleRemoveTraveler = (id: string, name: string) => {
@@ -248,32 +314,69 @@ const MemoPage: React.FC = () => {
         </View>
 
         <View className={styles.travelersCard}>
-          {trip.travelers.map(traveler => (
-            <View key={traveler.id} className={styles.travelerItem}>
-              <View className={styles.travelerAvatar}>
-                {traveler.name.charAt(0)}
-              </View>
-              <View className={styles.travelerInfo}>
-                <Text className={styles.travelerName}>{traveler.name}</Text>
-                <View>
-                  <Text className={styles.travelerRole}>{traveler.role}</Text>
+          {trip.travelers.map(traveler => {
+            const assignedItems = getAssignedItemsForTraveler(traveler.id);
+            const expenseRoles = traveler.expenseRoles || [];
+            return (
+              <View key={traveler.id} className={styles.travelerItem}>
+                <View className={styles.travelerAvatar}>
+                  {traveler.name.charAt(0)}
                 </View>
-                {traveler.tasks.length > 0 && (
-                  <Text className={styles.travelerTasks}>
-                    负责：{traveler.tasks.join('、')}
-                  </Text>
+                <View className={styles.travelerInfo}>
+                  <Text className={styles.travelerName}>{traveler.name}</Text>
+                  <View>
+                    <Text className={styles.travelerRole}>{traveler.role}</Text>
+                  </View>
+                  {traveler.tasks.length > 0 && (
+                    <Text className={styles.travelerTasks}>
+                      负责：{traveler.tasks.join('、')}
+                    </Text>
+                  )}
+                  {expenseRoles.length > 0 && (
+                    <View className={styles.expenseRoles}>
+                      <Text className={styles.rolesLabel}>费用负责：</Text>
+                      {expenseRoles.map(role => (
+                        <Text key={role} className={styles.roleTag}>
+                          {expenseCategoryIcons[role]} {EXPENSE_CATEGORY_MAP[role].label}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
+                  {assignedItems.length > 0 && (
+                    <View className={styles.assignedItems}>
+                      <Text className={styles.itemsLabel}>负责物品：</Text>
+                      <View className={styles.itemTags}>
+                        {assignedItems.slice(0, 3).map(item => (
+                          <Text key={item.id} className={styles.itemTag}>
+                            {item.name}
+                          </Text>
+                        ))}
+                        {assignedItems.length > 3 && (
+                          <Text className={styles.itemTag}>+{assignedItems.length - 3}项</Text>
+                        )}
+                      </View>
+                    </View>
+                  )}
+                  <View className={styles.travelerActions}>
+                    <Button className={styles.actionBtn} onClick={() => handleEditRoles(traveler)}>
+                      💰 费用角色
+                    </Button>
+                    <Button className={styles.actionBtn} onClick={() => handleAssignItems(traveler)}>
+                      🎒 分配物品
+                    </Button>
+                  </View>
+                </View>
+                {traveler.role !== '组织者' && (
+                  <Button
+                    style={{ fontSize: '24rpx', color: '#94a3b8', background: 'transparent' }}
+                    onClick={() => handleRemoveTraveler(traveler.id, traveler.name)}
+                  >
+                    移除
+                  </Button>
                 )}
               </View>
-              {traveler.role !== '组织者' && (
-                <Button
-                  style={{ fontSize: '24rpx', color: '#94a3b8', background: 'transparent' }}
-                  onClick={() => handleRemoveTraveler(traveler.id, traveler.name)}
-                >
-                  移除
-                </Button>
-              )}
-            </View>
-          ))}
+            );
+          })}
           <Button className={styles.addTravelerBtn} onClick={() => setShowAddTravelerModal(true)}>
             + 添加同行人
           </Button>
@@ -379,6 +482,114 @@ const MemoPage: React.FC = () => {
               </Button>
               <Button className={`${styles.modalBtn} ${styles.confirm}`} onClick={handleAddTraveler}>
                 添加
+              </Button>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {showEditRolesModal && editingTraveler && (
+        <View className={styles.modal} onClick={() => {
+          setShowEditRolesModal(false);
+          setEditingTraveler(null);
+        }}>
+          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>设置费用角色 - {editingTraveler.name}</Text>
+            <Text className={styles.modalSubtitle}>
+              选择{editingTraveler.name}负责垫付的费用类别（方便记账）
+            </Text>
+
+            <View className={styles.categoryGrid}>
+              {(Object.entries(EXPENSE_CATEGORY_MAP) as [ExpenseCategory, { label: string; color: string }][]).map(([key, config]) => (
+                <Button
+                  key={key}
+                  className={classnames(styles.categoryOption, selectedRoles.includes(key) && styles.active)}
+                  onClick={() => {
+                    if (selectedRoles.includes(key)) {
+                      setSelectedRoles(selectedRoles.filter(r => r !== key));
+                    } else {
+                      setSelectedRoles([...selectedRoles, key]);
+                    }
+                  }}
+                >
+                  <Text className={styles.icon}>{expenseCategoryIcons[key]}</Text>
+                  <Text className={styles.label}>{config.label}</Text>
+                </Button>
+              ))}
+            </View>
+
+            <View className={styles.modalActions}>
+              <Button
+                className={`${styles.modalBtn} ${styles.cancel}`}
+                onClick={() => {
+                  setShowEditRolesModal(false);
+                  setEditingTraveler(null);
+                }}
+              >
+                取消
+              </Button>
+              <Button className={`${styles.modalBtn} ${styles.confirm}`} onClick={handleSaveRoles}>
+                保存
+              </Button>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {showAssignItemsModal && editingTraveler && (
+        <View className={styles.modal} onClick={() => {
+          setShowAssignItemsModal(false);
+          setEditingTraveler(null);
+        }}>
+          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>分配物品 - {editingTraveler.name}</Text>
+            <Text className={styles.modalSubtitle}>
+              勾选{editingTraveler.name}负责准备/携带的物品
+            </Text>
+
+            <ScrollView className={styles.checklistScroll} scrollY>
+              {checklist.map(item => {
+                const isAssigned = (editingTraveler.assignedChecklistItems || []).includes(item.id);
+                const currentAssignee = getItemAssignee(item.id);
+                const isAssignedToOther = currentAssignee && currentAssignee.id !== editingTraveler.id;
+                return (
+                  <View
+                    key={item.id}
+                    className={classnames(
+                      styles.checklistAssignItem,
+                      isAssigned && styles.assigned,
+                      isAssignedToOther && styles.assignedToOther
+                    )}
+                    onClick={() => !isAssignedToOther && handleToggleItemAssignment(item.id)}
+                  >
+                    <View className={styles.checkbox}>
+                      {isAssigned ? '✓' : isAssignedToOther ? '✕' : ''}
+                    </View>
+                    <View className={styles.itemInfo}>
+                      <Text className={classnames(styles.itemName, item.checked && styles.checked)}>
+                        {item.name}
+                      </Text>
+                      <Text className={styles.itemCategory}>{item.category}</Text>
+                    </View>
+                    {isAssignedToOther && (
+                      <Text className={styles.assignedTo}>
+                        {currentAssignee?.name}负责
+                      </Text>
+                    )}
+                  </View>
+                );
+              })}
+            </ScrollView>
+
+            <View className={styles.modalActions}>
+              <Button
+                className={`${styles.modalBtn} ${styles.cancel}`}
+                onClick={() => {
+                  setShowAssignItemsModal(false);
+                  setEditingTraveler(null);
+                }}
+              >
+                完成
               </Button>
             </View>
           </View>

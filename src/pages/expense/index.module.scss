@@ -674,3 +674,208 @@
     color: #fff;
   }
 }
+
+.roleTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 8rpx;
+}
+
+.roleTag {
+  padding: 4rpx 12rpx;
+  background: rgba(37, 99, 235, 0.1);
+  color: $color-primary;
+  border-radius: $radius-round;
+  font-size: 20rpx;
+}
+
+.expenseActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  align-items: center;
+}
+
+.editItemBtn {
+  @include button-reset;
+  width: 48rpx;
+  height: 48rpx;
+  background: transparent;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  border-radius: $radius-round;
+
+  &:active {
+    background: $color-primary;
+    color: #fff;
+  }
+}
+
+.noAA {
+  margin-left: 16rpx;
+  color: $color-warning;
+}
+
+.settlementSummary {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: $shadow-card;
+}
+
+.summaryItem {
+  flex: 1;
+  text-align: center;
+
+  &:not(:last-child) {
+    border-right: 1rpx solid $color-border;
+  }
+
+  .summaryNum {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    color: $color-text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  .summaryLabel {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}
+
+.settleHint {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 16rpx 20rpx;
+  border-radius: $radius-md;
+  margin-bottom: 20rpx;
+
+  .hintIcon {
+    font-size: $font-size-md;
+  }
+
+  .hintText {
+    font-size: $font-size-xs;
+    color: $color-warning;
+    flex: 1;
+  }
+}
+
+.settlementList {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.settlementItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: 24rpx;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &.settled {
+    opacity: 0.6;
+    background: rgba(16, 185, 129, 0.05);
+  }
+}
+
+.settlementContent {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+}
+
+.settlementFlow {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+
+  .avatarSm {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  .personName {
+    font-size: 20rpx;
+    color: $color-text-secondary;
+  }
+}
+
+.arrow {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  font-weight: 600;
+}
+
+.settleAmount {
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-left: 24rpx;
+}
+
+.settlementActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.settleStatus {
+  font-size: 20rpx;
+  color: $color-text-secondary;
+}
+
+.clearBtn {
+  @include button-reset;
+  width: 100%;
+  height: 72rpx;
+  margin-top: 20rpx;
+  background: $color-bg-secondary;
+  color: $color-text-secondary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+}
+
+.switchRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+
+  .formLabel {
+    margin-bottom: 0;
+  }
+}
+
+.hintText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 8rpx;
+}

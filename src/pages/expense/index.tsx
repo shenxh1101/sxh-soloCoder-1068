@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Button, Input } from '@tarojs/components';
+import { View, Text, Button, Input, Switch } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import ExpenseChart from '@/components/ExpenseChart';
 import { useTripStore } from '@/store/useTripStore';
-import { EXPENSE_CATEGORY_MAP, type ExpenseCategory } from '@/types';
+import { EXPENSE_CATEGORY_MAP, type ExpenseCategory, type ExpenseItem } from '@/types';
 import { formatDateCN } from '@/utils';
 import styles from './index.module.scss';
 
@@ -20,6 +20,7 @@ const categoryIcons: Record<ExpenseCategory, string> = {
 const tabs = [
   { key: 'budget', label: '预算' },
   { key: 'aa', label: 'AA分摊' },
+  { key: 'settlement', label: '结算' },
   { key: 'detail', label: '明细' }
 ];
 
@@ -36,11 +37,16 @@ const ExpensePage: React.FC = () => {
     updateExpense,
     removeExpense,
     autoGenerateExpenses,
-    getAAData
+    getAAData,
+    getSettlementSuggestions,
+    markSettlement,
+    clearAllSettlements
   } = useTripStore();
 
   const [activeTab, setActiveTab] = useState('detail');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(null);
   const [editingBudget, setEditingBudget] = useState<string | null>(null);
   const [budgetInput, setBudgetInput] = useState('');
   const [form, setForm] = useState({
@@ -48,7 +54,8 @@ const ExpensePage: React.FC = () => {
     name: '',
     amount: '',
     notes: '',
-    paidBy: ''
+    paidBy: '',
+    isAA: true
   });
 
   const total = getTotalExpense();
@@ -57,6 +64,7 @@ const ExpensePage: React.FC = () => {
   const totalBudget = getTotalBudget();
   const totalDays = trip.days.length;
   const aaData = getAAData();
+  const settlements = getSettlementSuggestions();
 
   const averagePerDay = total > 0 ? Math.round(total / Math.max(totalDays, 1)) : 0;
   const budgetAvgPerDay = totalBudget > 0 ? Math.round(totalBudget / Math.max(totalDays, 1)) : 0;
@@ -68,16 +76,25 @@ const ExpensePage: React.FC = () => {
     });
   }, [expenses]);
 
+  const unsettledCount = settlements.filter(s => !s.isSettled).length;
+  const totalSettledAmount = settlements.filter(s => s.isSettled).reduce((sum, s) => sum + s.amount, 0);
+  const totalUnsettledAmount = settlements.filter(s => !s.isSettled).reduce((sum, s) => sum + s.amount, 0);
+
   const getTravelerName = (id?: string) => {
     if (!id) return '';
     const traveler = trip.travelers.find(t => t.id === id);
     return traveler?.name || '';
   };
 
+  const getTravelerExpenseRoles = (travelerId: string) => {
+    const traveler = trip.travelers.find(t => t.id === travelerId);
+    return traveler?.expenseRoles || [];
+  };
+
   const handleGenerate = () => {
     Taro.showModal({
       title: '生成费用',
-      content: '将根据行程中的景点门票和住宿信息自动生成费用明细，是否继续？',
+      content: '将根据行程中的景点门票和住宿信息自动生成费用明细，是否继续？非住宿类的已有费用会保留。',
       success: (res) => {
         if (res.confirm) {
           autoGenerateExpenses();
@@ -88,8 +105,22 @@ const ExpensePage: React.FC = () => {
   };
 
   const handleAdd = () => {
-    setForm({ category: 'ticket', name: '', amount: '', notes: '', paidBy: '' });
+    setForm({ category: 'ticket', name: '', amount: '', notes: '', paidBy: '', isAA: true });
     setShowAddModal(true);
+  };
+
+  const handleEdit = (expense: ExpenseItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingExpense(expense);
+    setForm({
+      category: expense.category,
+      name: expense.name,
+      amount: expense.amount.toString(),
+      notes: expense.notes || '',
+      paidBy: expense.paidBy || '',
+      isAA: expense.isAA !== false
+    });
+    setShowEditModal(true);
   };
 
   const handleSave = () => {
@@ -102,17 +133,31 @@ const ExpensePage: React.FC = () => {
       return;
     }
 
-    addExpense({
-      category: form.category,
-      name: form.name,
-      amount: Number(form.amount),
-      notes: form.notes,
-      paidBy: form.paidBy || undefined,
-      isAA: true
-    });
+    if (showEditModal && editingExpense) {
+      updateExpense(editingExpense.id, {
+        category: form.category,
+        name: form.name,
+        amount: Number(form.amount),
+        notes: form.notes,
+        paidBy: form.paidBy || undefined,
+        isAA: form.isAA
+      });
+      Taro.showToast({ title: '已更新', icon: 'success' });
+    } else {
+      addExpense({
+        category: form.category,
+        name: form.name,
+        amount: Number(form.amount),
+        notes: form.notes,
+        paidBy: form.paidBy || undefined,
+        isAA: form.isAA
+      });
+      Taro.showToast({ title: '已添加', icon: 'success' });
+    }
 
     setShowAddModal(false);
-    Taro.showToast({ title: '已添加', icon: 'success' });
+    setShowEditModal(false);
+    setEditingExpense(null);
   };
 
   const handleDelete = (id: string, name: string, e: React.MouseEvent) => {
@@ -142,6 +187,27 @@ const ExpensePage: React.FC = () => {
     Taro.showToast({ title: '预算已更新', icon: 'success' });
   };
 
+  const handleMarkSettlement = (settlementId: string, isSettled: boolean) => {
+    markSettlement(settlementId, isSettled);
+    Taro.showToast({
+      title: isSettled ? '已标记结清' : '已取消标记',
+      icon: 'success'
+    });
+  };
+
+  const handleClearSettlements = () => {
+    Taro.showModal({
+      title: '重置结算记录',
+      content: '确定要清空所有结算记录吗？',
+      success: (res) => {
+        if (res.confirm) {
+          clearAllSettlements();
+          Taro.showToast({ title: '已重置', icon: 'success' });
+        }
+      }
+    });
+  };
+
   const handleExport = () => {
     let content = `【${trip.name}】费用报表\n\n`;
     content += `📌 目的地：${trip.destination}\n`;
@@ -166,6 +232,9 @@ const ExpensePage: React.FC = () => {
         const name = getTravelerName(e.paidBy);
         content += ` | ${name}垫付`;
       }
+      if (e.isAA === false) {
+        content += ` | 不参与AA`;
+      }
       if (e.date) {
         content += ` | ${e.date}`;
       }
@@ -185,6 +254,19 @@ const ExpensePage: React.FC = () => {
           content += `${d.name}: 已结清\n`;
         }
       });
+
+      content += `\n--- 结算建议 ---\n`;
+      if (settlements.length === 0) {
+        content += `🎉 所有费用已结清！\n`;
+      } else {
+        settlements.forEach(s => {
+          const fromName = getTravelerName(s.from);
+          const toName = getTravelerName(s.to);
+          content += `${fromName} → ${toName}: ¥${s.amount.toFixed(2)} ${s.isSettled ? '✅已结清' : '⏳待结算'}\n`;
+        });
+        content += `\n已结清: ¥${totalSettledAmount.toFixed(2)}\n`;
+        content += `待结算: ¥${totalUnsettledAmount.toFixed(2)}\n`;
+      }
     }
 
     Taro.setClipboardData({
@@ -353,41 +435,145 @@ const ExpensePage: React.FC = () => {
               </View>
             ) : (
               <View className={styles.aaList}>
-                {aaData.map(item => (
-                  <View key={item.travelerId} className={styles.aaItem}>
-                    <View className={styles.aaHeader}>
-                      <View className={styles.travelerInfo}>
-                        <View className={styles.avatar}>
-                          {item.name.charAt(0)}
+                {aaData.map(item => {
+                  const roles = getTravelerExpenseRoles(item.travelerId);
+                  return (
+                    <View key={item.travelerId} className={styles.aaItem}>
+                      <View className={styles.aaHeader}>
+                        <View className={styles.travelerInfo}>
+                          <View className={styles.avatar}>
+                            {item.name.charAt(0)}
+                          </View>
+                          <View>
+                            <Text className={styles.name}>{item.name}</Text>
+                            <Text className={styles.role}>
+                              {trip.travelers.find(t => t.id === item.travelerId)?.role}
+                            </Text>
+                            {roles.length > 0 && (
+                              <View className={styles.roleTags}>
+                                {roles.map(role => (
+                                  <Text key={role} className={styles.roleTag}>
+                                    {EXPENSE_CATEGORY_MAP[role].label}
+                                  </Text>
+                                ))}
+                              </View>
+                            )}
+                          </View>
                         </View>
-                        <View>
-                          <Text className={styles.name}>{item.name}</Text>
-                          <Text className={styles.role}>
-                            {trip.travelers.find(t => t.id === item.travelerId)?.role}
+                        <View className={styles.aaDiff}>
+                          <Text
+                            className={classnames(
+                              styles.diffValue,
+                              item.diff > 0 ? styles.positive : item.diff < 0 ? styles.negative : styles.zero
+                            )}
+                          >
+                            {item.diff > 0 ? `+¥${item.diff.toFixed(2)}` :
+                             item.diff < 0 ? `-¥${Math.abs(item.diff).toFixed(2)}` : '¥0'}
+                          </Text>
+                          <Text className={styles.diffLabel}>
+                            {item.diff > 0 ? '应收' : item.diff < 0 ? '应付' : '已结清'}
                           </Text>
                         </View>
                       </View>
-                      <View className={styles.aaDiff}>
-                        <Text
-                          className={classnames(
-                            styles.diffValue,
-                            item.diff > 0 ? styles.positive : item.diff < 0 ? styles.negative : styles.zero
-                          )}
-                        >
-                          {item.diff > 0 ? `+¥${item.diff.toFixed(2)}` :
-                           item.diff < 0 ? `-¥${Math.abs(item.diff).toFixed(2)}` : '¥0'}
-                        </Text>
-                        <Text className={styles.diffLabel}>
-                          {item.diff > 0 ? '应收' : item.diff < 0 ? '应付' : '已结清'}
-                        </Text>
+                      <View className={styles.aaDetails}>
+                        <Text className={styles.paid}>已垫付: <span>¥{item.paid.toFixed(2)}</span></Text>
+                        <Text className={styles.shouldPay}>应付: <span>¥{item.shouldPay.toFixed(2)}</span></Text>
                       </View>
                     </View>
-                    <View className={styles.aaDetails}>
-                      <Text className={styles.paid}>已垫付: <span>¥{item.paid.toFixed(2)}</span></Text>
-                      <Text className={styles.shouldPay}>应付: <span>¥{item.shouldPay.toFixed(2)}</span></Text>
-                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+        )}
+
+        {activeTab === 'settlement' && (
+          <View>
+            {trip.travelers.length < 2 ? (
+              <View className={styles.emptyState}>
+                <Text className={styles.emptyIcon}>💰</Text>
+                <Text className={styles.emptyText}>请先添加同行人使用结算功能</Text>
+                <Button
+                  className={styles.emptyBtn}
+                  onClick={() => Taro.switchTab({ url: '/pages/memo/index' })}
+                >
+                  去添加同行人
+                </Button>
+              </View>
+            ) : (
+              <View>
+                <View className={styles.settlementSummary}>
+                  <View className={styles.summaryItem}>
+                    <Text className={styles.summaryNum}>{settlements.length}</Text>
+                    <Text className={styles.summaryLabel}>笔转账</Text>
                   </View>
-                ))}
+                  <View className={styles.summaryItem}>
+                    <Text className={styles.summaryNum} style={{ color: '#10b981' }}>¥{totalSettledAmount.toFixed(0)}</Text>
+                    <Text className={styles.summaryLabel}>已结清</Text>
+                  </View>
+                  <View className={styles.summaryItem}>
+                    <Text className={styles.summaryNum} style={{ color: '#f59e0b' }}>¥{totalUnsettledAmount.toFixed(0)}</Text>
+                    <Text className={styles.summaryLabel}>待结算</Text>
+                  </View>
+                </View>
+
+                {unsettledCount > 0 && (
+                  <View className={styles.settleHint}>
+                    <Text className={styles.hintIcon}>💡</Text>
+                    <Text className={styles.hintText}>还有 {unsettledCount} 笔待结算，转账完成后记得标记已结清哦~</Text>
+                  </View>
+                )}
+
+                {settlements.length === 0 ? (
+                  <View className={styles.emptyState}>
+                    <Text className={styles.emptyIcon}>🎉</Text>
+                    <Text className={styles.emptyText}>太棒了！所有费用已结清</Text>
+                  </View>
+                ) : (
+                  <View className={styles.settlementList}>
+                    {settlements.map((settlement) => (
+                      <View
+                        key={settlement.id}
+                        className={classnames(styles.settlementItem, settlement.isSettled && styles.settled)}
+                      >
+                        <View className={styles.settlementContent}>
+                          <View className={styles.settlementFlow}>
+                            <View className={styles.person}>
+                              <View className={styles.avatarSm}>
+                                {getTravelerName(settlement.from).charAt(0)}
+                              </View>
+                              <Text className={styles.personName}>{getTravelerName(settlement.from)}</Text>
+                            </View>
+                            <View className={styles.arrow}>→</View>
+                            <View className={styles.person}>
+                              <View className={styles.avatarSm}>
+                                {getTravelerName(settlement.to).charAt(0)}
+                              </View>
+                              <Text className={styles.personName}>{getTravelerName(settlement.to)}</Text>
+                            </View>
+                          </View>
+                          <Text className={styles.settleAmount}>¥{settlement.amount.toFixed(2)}</Text>
+                        </View>
+                        <View className={styles.settlementActions}>
+                          <Switch
+                            checked={settlement.isSettled}
+                            onChange={(e) => handleMarkSettlement(settlement.id, e.detail.value)}
+                            color='#10b981'
+                          />
+                          <Text className={styles.settleStatus}>
+                            {settlement.isSettled ? '已结清' : '待结算'}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {trip.settlements.length > 0 && (
+                  <Button className={styles.clearBtn} onClick={handleClearSettlements}>
+                    🔄 重置结算记录
+                  </Button>
+                )}
               </View>
             )}
           </View>
@@ -428,15 +614,26 @@ const ExpensePage: React.FC = () => {
                         {expense.paidBy && (
                           <Text className={styles.paidBy}> · {getTravelerName(expense.paidBy)}垫付</Text>
                         )}
+                        {expense.isAA === false && (
+                          <Text className={styles.noAA}> · 不参与AA</Text>
+                        )}
                       </Text>
                     </View>
                     <Text className={styles.expenseAmount}>¥{expense.amount}</Text>
-                    <Button
-                      className={styles.deleteBtn}
-                      onClick={(e) => handleDelete(expense.id, expense.name, e)}
-                    >
-                      ✕
-                    </Button>
+                    <View className={styles.expenseActions}>
+                      <Button
+                        className={styles.editItemBtn}
+                        onClick={(e) => handleEdit(expense, e)}
+                      >
+                        ✏️
+                      </Button>
+                      <Button
+                        className={styles.deleteBtn}
+                        onClick={(e) => handleDelete(expense.id, expense.name, e)}
+                      >
+                        ✕
+                      </Button>
+                    </View>
                   </View>
                 ))}
               </View>
@@ -454,10 +651,14 @@ const ExpensePage: React.FC = () => {
         </Button>
       </View>
 
-      {showAddModal && (
-        <View className={styles.modal} onClick={() => setShowAddModal(false)}>
+      {(showAddModal || showEditModal) && (
+        <View className={styles.modal} onClick={() => {
+          setShowAddModal(false);
+          setShowEditModal(false);
+          setEditingExpense(null);
+        }}>
           <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <Text className={styles.modalTitle}>添加费用</Text>
+            <Text className={styles.modalTitle}>{showEditModal ? '编辑费用' : '添加费用'}</Text>
 
             <View className={styles.formItem}>
               <Text className={styles.formLabel}>类别</Text>
@@ -520,6 +721,20 @@ const ExpensePage: React.FC = () => {
             </View>
 
             <View className={styles.formItem}>
+              <View className={styles.switchRow}>
+                <Text className={styles.formLabel}>参与AA分摊</Text>
+                <Switch
+                  checked={form.isAA}
+                  onChange={(e) => setForm({ ...form, isAA: e.detail.value })}
+                  color='#2563eb'
+                />
+              </View>
+              <Text className={styles.hintText}>
+                {form.isAA ? '该费用将计入AA分摊总额' : '该费用不计入AA分摊，由垫付人自行承担'}
+              </Text>
+            </View>
+
+            <View className={styles.formItem}>
               <Text className={styles.formLabel}>备注</Text>
               <Input
                 className={styles.formInput}
@@ -530,11 +745,18 @@ const ExpensePage: React.FC = () => {
             </View>
 
             <View className={styles.modalActions}>
-              <Button className={`${styles.modalBtn} ${styles.cancel}`} onClick={() => setShowAddModal(false)}>
+              <Button
+                className={`${styles.modalBtn} ${styles.cancel}`}
+                onClick={() => {
+                  setShowAddModal(false);
+                  setShowEditModal(false);
+                  setEditingExpense(null);
+                }}
+              >
                 取消
               </Button>
               <Button className={`${styles.modalBtn} ${styles.confirm}`} onClick={handleSave}>
-                保存
+                {showEditModal ? '更新' : '保存'}
               </Button>
             </View>
           </View>

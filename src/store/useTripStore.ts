@@ -12,7 +12,9 @@ import type {
   Traveler,
   Trip,
   Budget,
-  ExpenseCategory
+  ExpenseCategory,
+  Settlement,
+  AAData
 } from '@/types';
 
 interface TripState {
@@ -55,11 +57,17 @@ interface TripState {
   addTraveler: (traveler: Omit<Traveler, 'id'>) => void;
   removeTraveler: (id: string) => void;
   updateTravelerTask: (travelerId: string, tasks: string[]) => void;
+  updateTravelerExpenseRoles: (travelerId: string, roles: ExpenseCategory[]) => void;
+  assignChecklistItemToTraveler: (travelerId: string, itemId: string) => void;
+  unassignChecklistItemFromTraveler: (travelerId: string, itemId: string) => void;
 
   getTotalExpense: () => number;
   getExpenseByCategory: () => Record<string, number>;
   autoGenerateExpenses: () => void;
-  getAAData: () => { travelerId: string; name: string; paid: number; shouldPay: number; diff: number }[];
+  getAAData: () => AAData[];
+  getSettlementSuggestions: () => Settlement[];
+  markSettlement: (settlementId: string, isSettled: boolean) => void;
+  clearAllSettlements: () => void;
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
@@ -112,7 +120,8 @@ export const useTripStore = create<TripState>()(
           food: 2000,
           shopping: 1500,
           other: 500
-        }
+        },
+        settlements: []
       },
       favorites: [],
       expenses: [],
@@ -282,26 +291,19 @@ export const useTripStore = create<TripState>()(
       setHotel: (date, hotel) => set((state) => {
         const hotelData = { ...hotel, id: generateId() };
 
-        const existingHotelExpense = state.expenses.find(
+        const existingHotelExpenses = state.expenses.filter(
           e => e.category === 'hotel' && e.date === date
         );
+        existingHotelExpenses.forEach(e => get().removeExpense(e.id));
 
         if (hotelData.price > 0) {
-          if (existingHotelExpense) {
-            get().updateExpense(existingHotelExpense.id, {
-              name: hotelData.name,
-              amount: hotelData.price
-            });
-          } else {
-            get().addExpense({
-              category: 'hotel',
-              name: hotelData.name,
-              amount: hotelData.price,
-              date: date
-            });
-          }
-        } else if (existingHotelExpense) {
-          get().removeExpense(existingHotelExpense.id);
+          get().addExpense({
+            category: 'hotel',
+            name: hotelData.name,
+            amount: hotelData.price,
+            date: date,
+            isAA: true
+          });
         }
 
         return {
@@ -399,7 +401,12 @@ export const useTripStore = create<TripState>()(
 
       autoGenerateExpenses: () => {
         const { trip, favorites } = get();
+        const existingNonHotelExpenses = get().expenses.filter(e => e.category !== 'hotel');
         get().clearExpenses();
+
+        existingNonHotelExpenses.forEach(e => {
+          get().addExpense(e);
+        });
 
         trip.days.forEach(day => {
           if (day.hotel && day.hotel.price > 0) {
@@ -407,18 +414,25 @@ export const useTripStore = create<TripState>()(
               category: 'hotel',
               name: day.hotel.name,
               amount: day.hotel.price,
-              date: day.date
+              date: day.date,
+              isAA: true
             });
           }
           day.timeSlots.forEach(slot => {
             const attraction = favorites.find(f => f.id === slot.attractionId);
             if (attraction && attraction.ticketPrice > 0) {
-              get().addExpense({
-                category: 'ticket',
-                name: `${attraction.name} 门票`,
-                amount: attraction.ticketPrice,
-                date: day.date
-              });
+              const existingTicketExpense = get().expenses.find(
+                e => e.category === 'ticket' && e.date === day.date && e.name === `${attraction.name} 门票`
+              );
+              if (!existingTicketExpense) {
+                get().addExpense({
+                  category: 'ticket',
+                  name: `${attraction.name} 门票`,
+                  amount: attraction.ticketPrice,
+                  date: day.date,
+                  isAA: true
+                });
+              }
             }
           });
         });
@@ -427,11 +441,12 @@ export const useTripStore = create<TripState>()(
       getAAData: () => {
         const { trip, expenses, getTotalExpense } = get();
         const travelers = trip.travelers;
-        const total = getTotalExpense();
+        const aaExpenses = expenses.filter(e => e.isAA !== false);
+        const total = aaExpenses.reduce((sum, e) => sum + e.amount, 0);
         const perPerson = travelers.length > 0 ? total / travelers.length : 0;
 
         return travelers.map(traveler => {
-          const paid = expenses
+          const paid = aaExpenses
             .filter(e => e.paidBy === traveler.id)
             .reduce((sum, e) => sum + e.amount, 0);
           const shouldPay = perPerson;
@@ -444,7 +459,132 @@ export const useTripStore = create<TripState>()(
             diff
           };
         });
-      }
+      },
+
+      getSettlementSuggestions: () => {
+        const { trip, getAAData } = get();
+        const aaData = getAAData();
+        const travelers = trip.travelers;
+
+        const debtors = aaData.filter(d => d.diff < 0).map(d => ({ ...d, diff: Math.abs(d.diff) }));
+        const creditors = aaData.filter(d => d.diff > 0);
+
+        const suggestions: Settlement[] = [];
+
+        debtors.forEach(debtor => {
+          let remaining = debtor.diff;
+          creditors.forEach(creditor => {
+            if (remaining <= 0.01) return;
+            if (creditor.diff <= 0.01) return;
+
+            const amount = Math.min(remaining, creditor.diff);
+            if (amount > 0.01) {
+              const existingSettlement = trip.settlements.find(
+                s => s.from === debtor.travelerId && s.to === creditor.travelerId
+              );
+
+              suggestions.push({
+                id: existingSettlement?.id || generateId(),
+                from: debtor.travelerId,
+                to: creditor.travelerId,
+                amount: Math.round(amount * 100) / 100,
+                isSettled: existingSettlement?.isSettled || false,
+                settledAt: existingSettlement?.settledAt
+              });
+
+              remaining -= amount;
+              creditor.diff -= amount;
+            }
+          });
+        });
+
+        return suggestions;
+      },
+
+      markSettlement: (settlementId, isSettled) => set((state) => {
+        const existingIndex = state.trip.settlements.findIndex(s => s.id === settlementId);
+
+        if (existingIndex >= 0) {
+          const updatedSettlements = [...state.trip.settlements];
+          updatedSettlements[existingIndex] = {
+            ...updatedSettlements[existingIndex],
+            isSettled,
+            settledAt: isSettled ? new Date().toISOString() : undefined
+          };
+          return {
+            trip: {
+              ...state.trip,
+              settlements: updatedSettlements
+            }
+          };
+        } else {
+          const suggestions = get().getSettlementSuggestions();
+          const suggestion = suggestions.find(s => s.id === settlementId);
+          if (suggestion) {
+            return {
+              trip: {
+                ...state.trip,
+                settlements: [
+                  ...state.trip.settlements,
+                  {
+                    ...suggestion,
+                    isSettled,
+                    settledAt: isSettled ? new Date().toISOString() : undefined
+                  }
+                ]
+              }
+            };
+          }
+        }
+        return state;
+      }),
+
+      clearAllSettlements: () => set((state) => ({
+        trip: {
+          ...state.trip,
+          settlements: []
+        }
+      })),
+
+      updateTravelerExpenseRoles: (travelerId, roles) => set((state) => ({
+        trip: {
+          ...state.trip,
+          travelers: state.trip.travelers.map(t =>
+            t.id === travelerId ? { ...t, expenseRoles: roles } : t
+          )
+        }
+      })),
+
+      assignChecklistItemToTraveler: (travelerId, itemId) => set((state) => ({
+        trip: {
+          ...state.trip,
+          travelers: state.trip.travelers.map(t => {
+            if (t.id === travelerId) {
+              const assigned = t.assignedChecklistItems || [];
+              if (!assigned.includes(itemId)) {
+                return { ...t, assignedChecklistItems: [...assigned, itemId] };
+              }
+            } else {
+              const assigned = t.assignedChecklistItems || [];
+              if (assigned.includes(itemId)) {
+                return { ...t, assignedChecklistItems: assigned.filter(id => id !== itemId) };
+              }
+            }
+            return t;
+          })
+        }
+      })),
+
+      unassignChecklistItemFromTraveler: (travelerId, itemId) => set((state) => ({
+        trip: {
+          ...state.trip,
+          travelers: state.trip.travelers.map(t =>
+            t.id === travelerId
+              ? { ...t, assignedChecklistItems: (t.assignedChecklistItems || []).filter(id => id !== itemId) }
+              : t
+          )
+        }
+      }))
     }),
     {
       name: STORAGE_KEY,

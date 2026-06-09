@@ -428,3 +428,185 @@
     color: $color-text-secondary;
   }
 }
+
+.modalSubtitle {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+  display: block;
+}
+
+.expenseRoles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-top: $spacing-sm;
+}
+
+.rolesLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.roleTag {
+  padding: 4rpx 12rpx;
+  background: rgba(37, 99, 235, 0.1);
+  color: $color-primary;
+  border-radius: $radius-round;
+  font-size: 20rpx;
+}
+
+.assignedItems {
+  margin-top: $spacing-sm;
+}
+
+.itemsLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-right: $spacing-xs;
+}
+
+.itemTags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.itemTag {
+  padding: 2rpx 10rpx;
+  background: rgba(16, 185, 129, 0.1);
+  color: $color-success;
+  border-radius: $radius-round;
+  font-size: 20rpx;
+}
+
+.travelerActions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.actionBtn {
+  @include button-reset;
+  padding: $spacing-xs $spacing-sm;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+  font-size: 20rpx;
+  color: $color-text-secondary;
+  height: auto;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-sm;
+}
+
+.categoryOption {
+  @include button-reset;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-md 0;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+
+  .icon {
+    font-size: 36rpx;
+  }
+
+  .label {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+
+  &.active {
+    background: $color-primary;
+
+    .label {
+      color: $color-text-white;
+    }
+  }
+}
+
+.checklistScroll {
+  max-height: 500rpx;
+  margin-bottom: $spacing-md;
+}
+
+.checklistAssignItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-xs;
+  background: $color-bg-hover;
+  transition: all $transition-base;
+
+  &.assigned {
+    background: rgba(37, 99, 235, 0.1);
+  }
+
+  &.assignedToOther {
+    opacity: 0.5;
+  }
+}
+
+.checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-sm;
+  border: 2rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  flex-shrink: 0;
+  background: $color-bg-card;
+
+  .assigned & {
+    background: $color-primary;
+    border-color: $color-primary;
+    color: $color-text-white;
+  }
+
+  .assignedToOther & {
+    background: $color-error;
+    border-color: $color-error;
+    color: $color-text-white;
+  }
+}
+
+.itemInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  display: block;
+
+  &.checked {
+    text-decoration: line-through;
+    color: $color-text-tertiary;
+  }
+}
+
+.itemCategory {
+  font-size: 20rpx;
+  color: $color-text-secondary;
+}
+
+.assignedTo {
+  font-size: 20rpx;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}

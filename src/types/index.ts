@@ -57,6 +57,31 @@ export interface ExpenseItem {
   notes?: string;
   paidBy?: string;
   isAA?: boolean;
+  isSettled?: boolean;
+}
+
+export interface Settlement {
+  id: string;
+  from: string;
+  to: string;
+  amount: number;
+  isSettled: boolean;
+  settledAt?: string;
+  expenseIds?: string[];
+}
+
+export interface AAData {
+  travelerId: string;
+  name: string;
+  paid: number;
+  shouldPay: number;
+  diff: number;
+}
+
+export interface ExpenseRole {
+  category: 'ticket' | 'transport' | 'hotel' | 'food' | 'shopping' | 'other';
+  travelerId: string;
+  roleName: string;
 }
 
 export interface ChecklistItem {
@@ -72,6 +97,8 @@ export interface Traveler {
   role: string;
   avatar?: string;
   tasks: string[];
+  expenseRoles?: Array<'ticket' | 'transport' | 'hotel' | 'food' | 'shopping' | 'other'>;
+  assignedChecklistItems?: string[];
 }
 
 export interface Budget {
@@ -92,6 +119,7 @@ export interface Trip {
   days: DayPlan[];
   travelers: Traveler[];
   budget: Budget;
+  settlements: Settlement[];
 }
 
 export interface FavoriteAttraction extends Attraction {
