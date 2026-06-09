@@ -6,6 +6,35 @@
   padding-bottom: 120rpx;
 }
 
+.tripInfo {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-xl;
+  color: $color-text-white;
+  box-shadow: $shadow-card;
+}
+
+.tripName {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
+}
+
+.tripMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-lg;
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
 .weatherCard {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   border-radius: $radius-xl;

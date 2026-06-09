@@ -55,6 +55,8 @@ export interface ExpenseItem {
   amount: number;
   date?: string;
   notes?: string;
+  paidBy?: string;
+  isAA?: boolean;
 }
 
 export interface ChecklistItem {
@@ -72,6 +74,15 @@ export interface Traveler {
   tasks: string[];
 }
 
+export interface Budget {
+  ticket: number;
+  transport: number;
+  hotel: number;
+  food: number;
+  shopping: number;
+  other: number;
+}
+
 export interface Trip {
   id: string;
   name: string;
@@ -80,6 +91,7 @@ export interface Trip {
   endDate: string;
   days: DayPlan[];
   travelers: Traveler[];
+  budget: Budget;
 }
 
 export interface FavoriteAttraction extends Attraction {

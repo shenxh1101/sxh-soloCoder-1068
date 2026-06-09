@@ -10,7 +10,9 @@ import type {
   ChecklistItem,
   HotelInfo,
   Traveler,
-  Trip
+  Trip,
+  Budget,
+  ExpenseCategory
 } from '@/types';
 
 interface TripState {
@@ -23,6 +25,11 @@ interface TripState {
   setTripDestination: (destination: string) => void;
   setTripDates: (startDate: string, endDate: string) => void;
 
+  setBudget: (category: ExpenseCategory, amount: number) => void;
+  setAllBudgets: (budget: Partial<Budget>) => void;
+  getBudgetByCategory: () => Budget;
+  getTotalBudget: () => number;
+
   addFavorite: (attraction: Attraction) => void;
   removeFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
@@ -33,7 +40,7 @@ interface TripState {
   reorderTimeSlots: (date: string, slots: TimeSlot[]) => void;
   moveTimeSlot: (date: string, slotId: string, direction: 'up' | 'down') => void;
 
-  setHotel: (date: string, hotel: HotelInfo) => void;
+  setHotel: (date: string, hotel: Omit<HotelInfo, 'id'>) => void;
   removeHotel: (date: string) => void;
 
   addExpense: (expense: Omit<ExpenseItem, 'id'>) => void;
@@ -52,6 +59,7 @@ interface TripState {
   getTotalExpense: () => number;
   getExpenseByCategory: () => Record<string, number>;
   autoGenerateExpenses: () => void;
+  getAAData: () => { travelerId: string; name: string; paid: number; shouldPay: number; diff: number }[];
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
@@ -96,7 +104,15 @@ export const useTripStore = create<TripState>()(
         days: generateDays(defaultStart, defaultEnd),
         travelers: [
           { id: generateId(), name: '我', role: '组织者', tasks: ['行程规划', '酒店预订'] }
-        ]
+        ],
+        budget: {
+          ticket: 2000,
+          transport: 1000,
+          hotel: 4000,
+          food: 2000,
+          shopping: 1500,
+          other: 500
+        }
       },
       favorites: [],
       expenses: [],
@@ -151,6 +167,33 @@ export const useTripStore = create<TripState>()(
           }
         };
       }),
+
+      setBudget: (category, amount) => set((state) => ({
+        trip: {
+          ...state.trip,
+          budget: {
+            ...state.trip.budget,
+            [category]: amount
+          }
+        }
+      })),
+
+      setAllBudgets: (budget) => set((state) => ({
+        trip: {
+          ...state.trip,
+          budget: {
+            ...state.trip.budget,
+            ...budget
+          }
+        }
+      })),
+
+      getBudgetByCategory: () => get().trip.budget,
+
+      getTotalBudget: () => {
+        const budget = get().trip.budget;
+        return Object.values(budget).reduce((sum, val) => sum + val, 0);
+      },
 
       addFavorite: (attraction) => set((state) => {
         if (state.favorites.some(f => f.id === attraction.id)) return state;
@@ -239,19 +282,26 @@ export const useTripStore = create<TripState>()(
       setHotel: (date, hotel) => set((state) => {
         const hotelData = { ...hotel, id: generateId() };
 
-        state.expenses.forEach(expense => {
-          if (expense.category === 'hotel' && expense.date === date) {
-            get().removeExpense(expense.id);
-          }
-        });
+        const existingHotelExpense = state.expenses.find(
+          e => e.category === 'hotel' && e.date === date
+        );
 
         if (hotelData.price > 0) {
-          get().addExpense({
-            category: 'hotel',
-            name: hotelData.name,
-            amount: hotelData.price,
-            date: date
-          });
+          if (existingHotelExpense) {
+            get().updateExpense(existingHotelExpense.id, {
+              name: hotelData.name,
+              amount: hotelData.price
+            });
+          } else {
+            get().addExpense({
+              category: 'hotel',
+              name: hotelData.name,
+              amount: hotelData.price,
+              date: date
+            });
+          }
+        } else if (existingHotelExpense) {
+          get().removeExpense(existingHotelExpense.id);
         }
 
         return {
@@ -265,11 +315,12 @@ export const useTripStore = create<TripState>()(
       }),
 
       removeHotel: (date) => set((state) => {
-        state.expenses.forEach(expense => {
-          if (expense.category === 'hotel' && expense.date === date) {
-            get().removeExpense(expense.id);
-          }
-        });
+        const existingHotelExpense = state.expenses.find(
+          e => e.category === 'hotel' && e.date === date
+        );
+        if (existingHotelExpense) {
+          get().removeExpense(existingHotelExpense.id);
+        }
 
         return {
           trip: {
@@ -370,6 +421,28 @@ export const useTripStore = create<TripState>()(
               });
             }
           });
+        });
+      },
+
+      getAAData: () => {
+        const { trip, expenses, getTotalExpense } = get();
+        const travelers = trip.travelers;
+        const total = getTotalExpense();
+        const perPerson = travelers.length > 0 ? total / travelers.length : 0;
+
+        return travelers.map(traveler => {
+          const paid = expenses
+            .filter(e => e.paidBy === traveler.id)
+            .reduce((sum, e) => sum + e.amount, 0);
+          const shouldPay = perPerson;
+          const diff = paid - shouldPay;
+          return {
+            travelerId: traveler.id,
+            name: traveler.name,
+            paid,
+            shouldPay,
+            diff
+          };
         });
       }
     }),

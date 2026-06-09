@@ -2,115 +2,407 @@
 
 .page {
   min-height: 100vh;
-  padding: $spacing-md $page-padding;
-  padding-bottom: 160rpx;
+  background: linear-gradient(180deg, $color-bg-page 0%, #ffffff 100%);
+  padding-bottom: 140rpx;
+}
+
+.tripInfo {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: 32rpx;
+  color: #fff;
+}
+
+.tripName {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.tripMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24rpx;
+  font-size: 24rpx;
+  opacity: 0.95;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
 }
 
 .summaryCard {
-  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
-  border-radius: $radius-xl;
-  padding: $spacing-xl;
-  margin-bottom: $spacing-xl;
+  margin: -20rpx 32rpx 0;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: 32rpx;
   box-shadow: $shadow-card;
-  color: $color-text-white;
+  position: relative;
+  z-index: 2;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .summaryLabel {
   font-size: $font-size-sm;
-  opacity: 0.9;
-  margin-bottom: $spacing-xs;
+  color: $color-text-secondary;
 }
 
 .summaryAmount {
-  font-size: 64rpx;
-  font-weight: $font-weight-bold;
-  line-height: 1.2;
-  margin-bottom: $spacing-md;
+  font-size: $font-size-xxl;
+  font-weight: 700;
+  color: $color-text-primary;
 }
 
 .summaryStats {
   display: flex;
-  gap: $spacing-lg;
+  justify-content: space-between;
+  margin-top: 24rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid $color-border;
 }
 
 .statItem {
+  text-align: center;
   flex: 1;
 
-  .statNum {
-    font-size: $font-size-xl;
-    font-weight: $font-weight-semibold;
-  }
-
-  .statLabel {
-    font-size: $font-size-xs;
-    opacity: 0.8;
-    margin-top: 4rpx;
+  &:not(:last-child) {
+    border-right: 1rpx solid $color-border;
   }
 }
 
+.statNum {
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
 .section {
-  margin-bottom: $spacing-xl;
+  padding: 0 32rpx;
+  margin-top: 32rpx;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: $spacing-md;
+  margin-bottom: 20rpx;
 }
 
 .sectionTitle {
-  font-size: $font-size-xl;
-  font-weight: $font-weight-semibold;
+  font-size: $font-size-md;
+  font-weight: 600;
   color: $color-text-primary;
+}
+
+.sectionSub {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.toggleTabs {
+  display: flex;
+  background: $color-bg-secondary;
+  border-radius: $radius-button;
+  padding: 6rpx;
+  margin-bottom: 24rpx;
+}
+
+.tabBtn {
+  @include button-reset;
+  flex: 1;
+  height: 64rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-bg-card;
+    color: $color-primary;
+    font-weight: 600;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  }
+}
+
+.budgetList {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.budgetItem {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: 24rpx;
+  box-shadow: $shadow-card;
+}
+
+.budgetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.budgetLeft {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.categoryIcon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+}
+
+.categoryInfo {
+  .name {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $color-text-primary;
+  }
+
+  .spent {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}
+
+.budgetRight {
+  text-align: right;
+
+  .budget {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  .remaining {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $color-success;
+
+    &.over {
+      color: $color-error;
+    }
+  }
+}
+
+.progressBar {
+  height: 12rpx;
+  background: $color-bg-secondary;
+  border-radius: $radius-round;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: $radius-round;
+  transition: width $transition-base;
+
+  &.normal {
+    background: $color-success;
+  }
+
+  &.warning {
+    background: $color-warning;
+  }
+
+  &.over {
+    background: $color-error;
+  }
+}
+
+.budgetInput {
+  margin-top: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+
+  .prefix {
+    font-size: $font-size-md;
+    color: $color-price;
+    font-weight: 600;
+  }
+
+  input {
+    flex: 1;
+    height: 64rpx;
+    background: $color-bg-secondary;
+    border-radius: $radius-sm;
+    padding: 0 16rpx;
+    font-size: $font-size-sm;
+  }
+}
+
+.editBtn {
+  @include button-reset;
+  padding: 8rpx 20rpx;
+  background: $color-bg-secondary;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  color: $color-primary;
+}
+
+.aaList {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.aaItem {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: 24rpx;
+  box-shadow: $shadow-card;
+}
+
+.aaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.travelerInfo {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+
+  .avatar {
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: $font-size-md;
+    font-weight: 600;
+  }
+
+  .name {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $color-text-primary;
+  }
+
+  .role {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}
+
+.aaDiff {
+  text-align: right;
+
+  .diffValue {
+    font-size: $font-size-lg;
+    font-weight: 700;
+
+    &.positive {
+      color: $color-success;
+    }
+
+    &.negative {
+      color: $color-error;
+    }
+
+    &.zero {
+      color: $color-text-secondary;
+    }
+  }
+
+  .diffLabel {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}
+
+.aaDetails {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16rpx;
+  border-top: 1rpx solid $color-border;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+
+  .paid {
+    span {
+      color: $color-primary;
+      font-weight: 600;
+    }
+  }
+
+  .shouldPay {
+    span {
+      color: $color-text-primary;
+      font-weight: 600;
+    }
+  }
 }
 
 .addBtn {
   @include button-reset;
   height: 56rpx;
-  padding: 0 $spacing-lg;
+  padding: 0 24rpx;
   background: $color-primary;
-  color: $color-text-white;
+  color: #fff;
   border-radius: $radius-button;
-  font-size: $font-size-sm;
-
-  &:active {
-    opacity: 0.9;
-    transform: scale(0.96);
-  }
+  font-size: $font-size-xs;
+  font-weight: 500;
 }
 
 .expenseList {
-  background: $color-bg-card;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-card;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
 }
 
 .expenseItem {
   display: flex;
   align-items: center;
-  padding: $spacing-md $spacing-lg;
-  border-bottom: 1rpx solid $color-divider;
-
-  &:last-child {
-    border-bottom: none;
-  }
+  gap: 16rpx;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: 20rpx;
+  box-shadow: $shadow-card;
 
   &:active {
-    background: $color-bg-hover;
+    transform: scale(0.98);
   }
 }
 
 .categoryIcon {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: $radius-lg;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-md;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36rpx;
-  margin-right: $spacing-md;
+  font-size: 32rpx;
   flex-shrink: 0;
 }
 
@@ -121,94 +413,105 @@
 
 .expenseName {
   font-size: $font-size-md;
-  font-weight: $font-weight-medium;
+  font-weight: 600;
   color: $color-text-primary;
-  @include text-ellipsis;
+  margin-bottom: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .expenseDate {
   font-size: $font-size-xs;
-  color: $color-text-tertiary;
-  margin-top: 4rpx;
+  color: $color-text-secondary;
+
+  .paidBy {
+    margin-left: 16rpx;
+    color: $color-primary;
+  }
 }
 
 .expenseAmount {
   font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
+  font-weight: 700;
   color: $color-text-primary;
-  margin-left: $spacing-md;
   flex-shrink: 0;
 }
 
+.deleteBtn {
+  @include button-reset;
+  width: 48rpx;
+  height: 48rpx;
+  background: transparent;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  border-radius: $radius-round;
+
+  &:active {
+    background: $color-error;
+    color: #fff;
+  }
+}
+
 .emptyState {
-  padding: $spacing-xl * 2;
+  padding: 80rpx 32rpx;
   text-align: center;
   background: $color-bg-card;
-  border-radius: $radius-lg;
+  border-radius: $radius-md;
   border: 2rpx dashed $color-border;
 }
 
 .emptyIcon {
-  font-size: 100rpx;
-  margin-bottom: $spacing-md;
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
+  display: block;
 }
 
 .emptyText {
-  font-size: $font-size-md;
+  font-size: $font-size-sm;
   color: $color-text-tertiary;
-  margin-bottom: $spacing-md;
+  margin-bottom: 24rpx;
 }
 
 .emptyBtn {
   @include button-reset;
-  display: inline-flex;
-  height: 72rpx;
-  padding: 0 $spacing-xl;
-  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
-  color: $color-text-white;
+  display: inline-block;
+  padding: 16rpx 40rpx;
+  background: $color-primary;
+  color: #fff;
   border-radius: $radius-button;
-  font-size: $font-size-md;
-  font-weight: $font-weight-medium;
-
-  &:active {
-    opacity: 0.9;
-    transform: scale(0.98);
-  }
+  font-size: $font-size-sm;
 }
 
 .bottomBar {
   position: fixed;
-  bottom: 120rpx;
-  left: $page-padding;
-  right: $page-padding;
-  display: flex;
-  gap: $spacing-md;
-  padding: $spacing-md;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: $color-bg-card;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-float;
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: 20rpx;
 }
 
 .bottomBtn {
   @include button-reset;
   flex: 1;
-  height: 80rpx;
+  height: 88rpx;
   border-radius: $radius-button;
   font-size: $font-size-md;
-  font-weight: $font-weight-medium;
+  font-weight: 600;
 
-  &:active {
-    transform: scale(0.98);
+  &.secondary {
+    background: $color-bg-secondary;
+    color: $color-text-secondary;
   }
 
   &.primary {
     background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
-    color: $color-text-white;
-  }
-
-  &.secondary {
-    background: $color-bg-hover;
-    color: $color-text-secondary;
+    color: #fff;
   }
 }
 
@@ -223,70 +526,71 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: $page-padding;
+  padding: 32rpx;
 }
 
 .modalContent {
   width: 100%;
-  max-width: 686rpx;
   background: $color-bg-card;
-  border-radius: $radius-xl;
-  padding: $spacing-xl;
+  border-radius: $radius-lg;
+  padding: 32rpx;
   max-height: 80vh;
   overflow-y: auto;
 }
 
 .modalTitle {
-  font-size: $font-size-xl;
-  font-weight: $font-weight-semibold;
+  font-size: $font-size-lg;
+  font-weight: 600;
   color: $color-text-primary;
-  margin-bottom: $spacing-lg;
+  margin-bottom: 32rpx;
   text-align: center;
 }
 
 .formItem {
-  margin-bottom: $spacing-lg;
+  margin-bottom: 32rpx;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .formLabel {
   font-size: $font-size-sm;
-  color: $color-text-secondary;
-  margin-bottom: $spacing-sm;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin-bottom: 16rpx;
+  display: block;
 }
 
 .formInput {
   width: 100%;
-  height: 80rpx;
-  background: $color-bg-hover;
+  height: 88rpx;
+  background: $color-bg-secondary;
   border-radius: $radius-md;
-  padding: 0 $spacing-md;
+  padding: 0 24rpx;
   font-size: $font-size-md;
-  color: $color-text-primary;
   box-sizing: border-box;
 }
 
 .categoryGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-md;
+  gap: 16rpx;
 }
 
 .categoryOption {
   @include button-reset;
+  display: flex;
   flex-direction: column;
-  padding: $spacing-md;
-  background: $color-bg-hover;
+  align-items: center;
+  gap: 8rpx;
+  padding: 20rpx 0;
+  background: $color-bg-secondary;
   border-radius: $radius-md;
-  border: 3rpx solid transparent;
-
-  &.active {
-    border-color: $color-primary;
-    background: rgba($color-primary, 0.05);
-  }
+  transition: all $transition-base;
 
   .icon {
-    font-size: 40rpx;
-    margin-bottom: $spacing-xs;
+    font-size: 36rpx;
   }
 
   .label {
@@ -294,53 +598,79 @@
     color: $color-text-secondary;
   }
 
-  &.active .label {
-    color: $color-primary;
-    font-weight: $font-weight-medium;
+  &.active {
+    background: $color-primary;
+
+    .label {
+      color: #fff;
+    }
+  }
+}
+
+.travelerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+}
+
+.travelerOption {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx;
+  background: $color-bg-secondary;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+
+  .avatar {
+    width: 48rpx;
+    height: 48rpx;
+    border-radius: 50%;
+    background: $color-primary;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-xs;
+    font-weight: 600;
+  }
+
+  .name {
+    font-size: $font-size-sm;
+    color: $color-text-primary;
+  }
+
+  &.active {
+    background: $color-primary;
+
+    .name {
+      color: #fff;
+    }
   }
 }
 
 .modalActions {
   display: flex;
-  gap: $spacing-md;
-  margin-top: $spacing-xl;
+  gap: 16rpx;
+  margin-top: 32rpx;
 }
 
 .modalBtn {
   @include button-reset;
   flex: 1;
-  height: 80rpx;
+  height: 88rpx;
   border-radius: $radius-button;
   font-size: $font-size-md;
-  font-weight: $font-weight-medium;
+  font-weight: 600;
 
-  &:active {
-    transform: scale(0.98);
+  &.cancel {
+    background: $color-bg-secondary;
+    color: $color-text-secondary;
   }
 
   &.confirm {
-    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
-    color: $color-text-white;
-  }
-
-  &.cancel {
-    background: $color-bg-hover;
-    color: $color-text-secondary;
-  }
-}
-
-.deleteBtn {
-  @include button-reset;
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: $radius-round;
-  background: transparent;
-  color: $color-text-tertiary;
-  font-size: 28rpx;
-  margin-left: $spacing-sm;
-
-  &:active {
-    color: $color-error;
-    background: rgba($color-error, 0.1);
+    background: $color-primary;
+    color: #fff;
   }
 }

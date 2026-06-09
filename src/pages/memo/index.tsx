@@ -91,9 +91,11 @@ const MemoPage: React.FC = () => {
   };
 
   const handleShareChecklist = () => {
-    let content = `【出行清单】${trip.name}\n\n`;
-    content += `出发日期: ${formatDateCN(trip.startDate)}\n`;
-    content += `完成进度: ${progress.percent}% (${progress.checked}/${progress.total})\n\n`;
+    let content = `【${trip.name}】出行清单\n\n`;
+    content += `📌 目的地：${trip.destination}\n`;
+    content += `📅 日期：${formatDateCN(trip.startDate)} - ${formatDateCN(trip.endDate)} (${trip.days.length}天)\n`;
+    content += `👥 同行人：${trip.travelers.length}人\n`;
+    content += `✅ 完成进度：${progress.percent}% (${progress.checked}/${progress.total})\n\n`;
 
     const grouped: Record<string, typeof checklist> = {};
     checklist.forEach(item => {
@@ -109,6 +111,9 @@ const MemoPage: React.FC = () => {
       content += '\n';
     });
 
+    content += `---\n`;
+    content += `分享自「旅行规划」App`;
+
     Taro.setClipboardData({
       data: content,
       success: () => {
@@ -121,6 +126,24 @@ const MemoPage: React.FC = () => {
 
   return (
     <View className={styles.page}>
+      <View className={styles.tripInfo}>
+        <Text className={styles.tripName}>{trip.name}</Text>
+        <View className={styles.tripMeta}>
+          <View className={styles.metaItem}>
+            <Text>📍</Text>
+            <Text>{trip.destination}</Text>
+          </View>
+          <View className={styles.metaItem}>
+            <Text>📅</Text>
+            <Text>{formatDateCN(trip.startDate)} - {formatDateCN(trip.endDate)}</Text>
+          </View>
+          <View className={styles.metaItem}>
+            <Text>⏱️</Text>
+            <Text>{trip.days.length}天</Text>
+          </View>
+        </View>
+      </View>
+
       <View className={styles.weatherCard}>
         <View className={styles.weatherHeader}>
           <View>
